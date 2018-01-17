@@ -33,12 +33,12 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 			}
 			//在这里生成并且put bean代理
 			Object proxy = createServiceProxy(bean, filter);
-			logger.info("注册rpc方法");
+			logger.debug("注册rpc方法");
 			Class<?>[] interfaces = bean.getClass().getInterfaces();
 			for (Class inf : interfaces) {
 				Method[] allDeclaredMethods = ReflectionUtils.getAllDeclaredMethods(inf);
 				for (Method method : allDeclaredMethods) {
-					logger.info("interfaceName:{} methodName:{}", inf.getName(), method.getName());
+					logger.debug("interfaceName:{} methodName:{}", inf.getName(), method.getName());
 					RpcServiceContext.addRpcMapping(inf.getName() + "#" + method.getName(), proxy);
 				}
 			}

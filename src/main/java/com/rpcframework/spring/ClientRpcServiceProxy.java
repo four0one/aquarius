@@ -62,7 +62,9 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 				break;
 			}
 		}
-		logger.info("request : {}", request);
+		logger.debug("request : {}", request);
+		//发送请求
+
 		return null;
 	}
 }

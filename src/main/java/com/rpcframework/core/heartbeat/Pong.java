@@ -1,11 +1,13 @@
 package com.rpcframework.core.heartbeat;
 
+import java.io.Serializable;
+
 /**
  * 服务端返回
  * @author wei.chen1
  * @since 2018/1/17
  */
-public class Pong {
+public class Pong implements Serializable{
 
 	private String msg;
 

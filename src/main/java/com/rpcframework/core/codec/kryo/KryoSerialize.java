@@ -35,7 +35,7 @@ public class KryoSerialize {
 		Kryo kryo = KryoFactoryPool.getKryo();
 		ByteArrayInputStream input = new ByteArrayInputStream(bytes);
 		Input in = new Input(input);
-		Object object = kryo.readObject(in, Object.class);
+		Object object = kryo.readClassAndObject(in);
 		in.close();
 		input.close();
 		KryoFactoryPool.release(kryo);

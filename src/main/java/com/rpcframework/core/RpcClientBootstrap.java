@@ -3,14 +3,14 @@ package com.rpcframework.core;
 import com.rpcframework.core.codec.MessageDecoder;
 import com.rpcframework.core.codec.MessageEncoder;
 import com.rpcframework.core.handler.RpcClientHandler;
+import com.rpcframework.core.heartbeat.HeartBeatClientHandler;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author wei.chen1
@@ -18,25 +18,71 @@ import io.netty.channel.socket.nio.NioSocketChannel;
  */
 public class RpcClientBootstrap {
 
-	public void start(String host, int port) {
-		EventLoopGroup group = new NioEventLoopGroup(2);
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
+
+	private String host;
+
+	private int port;
+
+	private Bootstrap bootstrap;
+
+	private RpcClientChannelInitializer handler;
+
+	private EventLoopGroup group;
+
+	private RpcClientBootstrapContext context = RpcClientBootstrapContext.getInstance();
+
+	public RpcClientBootstrap() {
+
+	}
+
+	public RpcClientBootstrap(String host, int port) {
+		this.host = host;
+		this.port = port;
+	}
+
+	public void start() {
+		group = new NioEventLoopGroup();
 		try {
-			Bootstrap bootstrap = new Bootstrap();
+			bootstrap = new Bootstrap();
+			handler = new RpcClientChannelInitializer();
 			bootstrap.group(group).channel(NioSocketChannel.class).remoteAddress(host, port)
-					.handler(new ChannelInitializer<SocketChannel>() {
-						protected void initChannel(SocketChannel socketChannel) throws Exception {
-							ChannelPipeline pipeline = socketChannel.pipeline();
-							pipeline.addLast("decode", new MessageDecoder());
-							pipeline.addLast("encode", new MessageEncoder());
-							pipeline.addLast(new RpcClientHandler());
-						}
-					});
+					.handler(handler);
 			ChannelFuture channelFuture = bootstrap.connect().sync();
-			channelFuture.channel().closeFuture();
+			channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
+				if (channelFuture1.isSuccess()) {
+					logger.debug("RPC客户端启动成功");
+					context.setBootstrap(this);
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
 			group.shutdownGracefully();
 		}
 	}
+
+	public void restart() {
+		int count = context.getRestartCount().decrementAndGet();
+		if (count <= 0) {
+			context.getScheduledFuture().cancel(false);
+			logger.debug("3次重连结束，无法连接到服务端");
+			group.shutdownGracefully();
+			return;
+		}
+		try {
+			ChannelFuture future = bootstrap.connect().sync();
+			future.addListener((ChannelFutureListener) channelFuture -> {
+				logger.debug("重连结果{}", channelFuture.isSuccess());
+				if (channelFuture.isSuccess()) {
+					context.getScheduledFuture().cancel(false);
+				}
+			});
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("{}", e);
+		}
+	}
+
+
 }

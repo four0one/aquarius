@@ -3,16 +3,18 @@ package com.rpcframework.core;
 import com.rpcframework.core.codec.MessageDecoder;
 import com.rpcframework.core.codec.MessageEncoder;
 import com.rpcframework.core.handler.RpcServerHandler;
+import com.rpcframework.core.heartbeat.HeartBeatServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.nio.channels.spi.SelectorProvider;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author wei.chen1
@@ -36,7 +38,9 @@ public class RpcServerBootstrap {
 						ChannelPipeline pipeline = socketChannel.pipeline();
 						pipeline.addLast("decode",new MessageDecoder());
 						pipeline.addLast("encode",new MessageEncoder());
+						pipeline.addLast("idle", new IdleStateHandler(5,0,0, TimeUnit.SECONDS));
 						pipeline.addLast("rpcServerHandler", new RpcServerHandler());
+						pipeline.addLast("pongHandler", new HeartBeatServerHandler());
 					}
 				}).option(ChannelOption.SO_BACKLOG, 128)
 				.childOption(ChannelOption.SO_KEEPALIVE, true);
@@ -45,7 +49,7 @@ public class RpcServerBootstrap {
 			int finalPort = port;
 			channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
 				if (channelFuture1.isSuccess()) {
-					logger.info("RPC服务端启动成功,端口为：{}", finalPort);
+					logger.debug("RPC服务端启动成功,端口为：{}", finalPort);
 				}
 			});
 		} catch (Exception e) {

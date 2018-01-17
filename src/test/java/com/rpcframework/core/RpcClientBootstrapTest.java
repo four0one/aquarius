@@ -14,9 +14,8 @@ import static org.junit.Assert.*;
 public class RpcClientBootstrapTest {
 
 	public static void main(String[] args) {
-		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
-		ClientController bean = context.getBean(ClientController.class);
-		bean.say();
+		RpcClientBootstrap clientBootstrap = new RpcClientBootstrap("127.0.0.1",8089);
+		clientBootstrap.start();
 	}
 
 

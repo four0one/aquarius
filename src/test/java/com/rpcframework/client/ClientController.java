@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 public class ClientController {
 
 	@RpcResource
-	private DemoServiceImpl demoService;
+	private DemoService demoService;
 
 	public void say(){
 		demoService.hello();
