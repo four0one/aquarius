@@ -1,7 +1,9 @@
 package com.rpcframework.spring;
 
+import com.rpcframework.core.ClientTransceiver;
 import com.rpcframework.core.RpcRequest;
 
+import com.rpcframework.core.RpcResponse;
 import com.rpcframework.exception.RpcRequestException;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.Factory;
@@ -14,6 +16,10 @@ import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * 接口服务代理，远程调用接口返回结果
@@ -25,6 +31,10 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	private ClientTransceiver clientTransceiver = ClientTransceiver.getInstance();
+
+	private ExecutorService requestCallThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
 	private static class ClientRpcServiceProxyHolder {
 		private static ClientRpcServiceProxy INSTANCE = new ClientRpcServiceProxy();
 	}
@@ -33,7 +43,7 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 		return ClientRpcServiceProxyHolder.INSTANCE;
 	}
 
-	public void injectProxy(Field field, Object bean) throws RpcRequestException{
+	public void injectProxy(Field field, Object bean) throws RpcRequestException {
 		if (!field.getType().isInterface()) {
 			throw new RpcRequestException("rpc实例注入失败，该实例声明类型不是接口");
 		}
@@ -62,9 +72,17 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 				break;
 			}
 		}
-		logger.debug("request : {}", request);
 		//发送请求
-
-		return null;
+		Future<RpcResponse> responseFuture = requestCallThreadPool.submit(new Callable<RpcResponse>() {
+			@Override
+			public RpcResponse call() throws Exception {
+				return clientTransceiver.sendRequest(request);
+			}
+		});
+		RpcResponse response = responseFuture.get();
+		if (!response.getRequestId().equals(request.getRequestId())) {
+			logger.error("出现不一致问题:{}",response.getRequestId());
+		}
+		return response == null ? null : response.getRequestId();
 	}
 }

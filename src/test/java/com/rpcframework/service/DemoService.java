@@ -6,5 +6,5 @@ package com.rpcframework.service;
  */
 public interface DemoService {
 
-	void hello();
+	String hello();
 }

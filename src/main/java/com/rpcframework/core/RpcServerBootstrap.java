@@ -38,7 +38,7 @@ public class RpcServerBootstrap {
 						ChannelPipeline pipeline = socketChannel.pipeline();
 						pipeline.addLast("decode",new MessageDecoder());
 						pipeline.addLast("encode",new MessageEncoder());
-						pipeline.addLast("idle", new IdleStateHandler(5,0,0, TimeUnit.SECONDS));
+						pipeline.addLast("idle", new IdleStateHandler(60,0,0, TimeUnit.SECONDS));
 						pipeline.addLast("rpcServerHandler", new RpcServerHandler());
 						pipeline.addLast("pongHandler", new HeartBeatServerHandler());
 					}

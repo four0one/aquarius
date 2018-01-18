@@ -16,7 +16,7 @@ public class ClientController {
 	private DemoService demoService;
 
 	public void say(){
-		demoService.hello();
+		String msgId = demoService.hello();
 	}
 
 }

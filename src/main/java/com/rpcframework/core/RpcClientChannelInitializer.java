@@ -23,7 +23,7 @@ public class RpcClientChannelInitializer extends ChannelInitializer<NioSocketCha
 		pipeline.addLast("decode", new MessageDecoder());
 		pipeline.addLast("encode", new MessageEncoder());
 
-		pipeline.addLast("idle", new IdleStateHandler(0,4,0, TimeUnit.SECONDS));
+		pipeline.addLast("idle", new IdleStateHandler(0,50,0, TimeUnit.SECONDS));
 		pipeline.addLast("sendMsgHandler",new RpcClientHandler());
 		pipeline.addLast("pingHandler",new HeartBeatClientHandler());
 	}

@@ -15,6 +15,16 @@ public class RpcRequest implements Serializable {
 
 	private Object[] parameters;
 
+	private String requestId;
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
+
 	public String getMethod() {
 		return method;
 	}
@@ -45,6 +55,7 @@ public class RpcRequest implements Serializable {
 				"method='" + method + '\'' +
 				", service='" + service + '\'' +
 				", parameters=" + Arrays.toString(parameters) +
+				", requestId='" + requestId + '\'' +
 				'}';
 	}
 }

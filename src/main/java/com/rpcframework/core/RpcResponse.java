@@ -7,4 +7,21 @@ import java.io.Serializable;
  * @since 2018/1/16
  */
 public class RpcResponse implements Serializable {
+
+	private String requestId;
+
+	public String getRequestId() {
+		return requestId;
+	}
+
+	public void setRequestId(String requestId) {
+		this.requestId = requestId;
+	}
+
+	@Override
+	public String toString() {
+		return "RpcResponse{" +
+				"requestId='" + requestId + '\'' +
+				'}';
+	}
 }

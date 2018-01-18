@@ -1,3 +1,5 @@
+import com.rpcframework.annotation.RpcResource;
+import com.rpcframework.core.ClientRunnable;
 import com.rpcframework.service.DemoService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,13 +16,8 @@ import javax.annotation.Resource;
 @ContextConfiguration(locations = {"classpath:spring-config-client.xml"})
 public class SpringContextText {
 
-	@Resource
-	private DemoService demoService;
-
 	@Test
 	public void testMyDao() {
-
-		demoService.hello();
 
 	}
 

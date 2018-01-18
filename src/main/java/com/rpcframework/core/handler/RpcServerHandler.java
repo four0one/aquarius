@@ -1,5 +1,7 @@
 package com.rpcframework.core.handler;
 
+import com.rpcframework.core.RpcRequest;
+import com.rpcframework.core.RpcResponse;
 import com.rpcframework.core.heartbeat.Ping;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -22,7 +24,14 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
 			ctx.fireChannelRead(msg);
 			return;
 		}
-		//TODO 处理服务调用，线程or调用
+		if (msg instanceof RpcRequest) {
+			logger.info("request:{}", msg);
+			RpcRequest request = (RpcRequest) msg;
+			RpcResponse response = new RpcResponse();
+			response.setRequestId(request.getRequestId());
+			ctx.writeAndFlush(response);
+			return;
+		}
 	}
 
 }
