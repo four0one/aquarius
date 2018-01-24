@@ -3,17 +3,20 @@
             xmlns="http://www.rpcframework.com/schema/aquarius-client"
             targetNamespace="http://www.rpcframework.com/schema/aquarius-client"
             elementFormDefault="qualified">
-    <xsd:element name="service">
+
+    <!--为客户端rpc注解注入代理-->
+    <xsd:element name="client">
         <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" />
+            <xsd:attribute name="id" type="xsd:string" default="rpc-client"/>
+        </xsd:complexType>
+    </xsd:element>
+    <!--定义监控地址获取服务信息-->
+    <xsd:element name="monitor">
+        <xsd:complexType>
+            <xsd:attribute name="id" type="xsd:string" default="rpc-monitor"/>
+            <xsd:attribute name="address" type="xsd:string"/>
+            <xsd:attribute name="flushInterval" type="xsd:long" default="0"/>
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="registry">
-        <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" />
-            <xsd:attribute name="address" type="xsd:string" />
-            <xsd:attribute name="port" type="xsd:int" />
-        </xsd:complexType>
-    </xsd:element>
 </xsd:schema>

@@ -10,6 +10,7 @@ public class AquariusClientNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override
 	public void init() {
-		registerBeanDefinitionParser("service", new RpcClientParser());
+		registerBeanDefinitionParser("client", new RpcClientParser());
+		registerBeanDefinitionParser("monitor", new ClientMonitorParser());
 	}
 }

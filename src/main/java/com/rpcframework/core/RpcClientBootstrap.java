@@ -51,7 +51,7 @@ public class RpcClientBootstrap {
 			ChannelFuture channelFuture = bootstrap.connect().sync();
 			channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
 				if (channelFuture1.isSuccess()) {
-					logger.debug("RPC客户端启动成功");
+					logger.debug("{}:{}RPC客户端启动成功", host, port);
 					context.setBootstrap(this);
 				}
 			});

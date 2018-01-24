@@ -4,6 +4,10 @@ package com.rpcframework.core;
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.ScheduledFuture;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -15,6 +19,7 @@ public class RpcClientBootstrapContext {
 	private RpcClientBootstrap bootstrap;
 
 	private Channel channel;
+	private Map<String, Channel> channelMap = new HashMap<>();
 
 
 	private ScheduledFuture<?> scheduledFuture;
@@ -37,12 +42,22 @@ public class RpcClientBootstrapContext {
 		return ContextHolder.INSTANCE;
 	}
 
-	public Channel getChannel() {
-		return channel;
+	public Channel getChannel(String host, int port) {
+		StringBuffer hostAndPort = hostAndPort(host, port);
+		return channelMap.get(hostAndPort.toString());
 	}
 
 	public void setChannel(Channel channel) {
-		this.channel = channel;
+		InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
+		StringBuffer hostAndPort = hostAndPort(socketAddress.getHostString(), socketAddress.getPort());
+		channelMap.put(hostAndPort.toString(), channel);
+	}
+
+	private StringBuffer hostAndPort(String host, int port) {
+		StringBuffer hostAndPort = new StringBuffer(host);
+		hostAndPort.append(":");
+		hostAndPort.append(port);
+		return hostAndPort;
 	}
 
 	public AtomicInteger getRestartCount() {

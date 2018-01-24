@@ -80,9 +80,7 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 			}
 		});
 		RpcResponse response = responseFuture.get();
-		if (!response.getRequestId().equals(request.getRequestId())) {
-			logger.error("出现不一致问题:{}",response.getRequestId());
-		}
-		return response == null ? null : response.getRequestId();
+		//TODO 返回结果
+		return null;
 	}
 }

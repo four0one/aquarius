@@ -12,13 +12,16 @@ import org.w3c.dom.Element;
  * @author wei.chen1
  * @since 2018/1/16
  */
-public class RpcClientParser implements BeanDefinitionParser {
+public class MonitorParser implements BeanDefinitionParser {
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setBeanClass(ClientRpcServiceProxyProcessor.class);
+		beanDefinition.setBeanClass(Monitor.class);
 		beanDefinition.setLazyInit(false);
-		parserContext.getRegistry().registerBeanDefinition(ClientRpcServiceProxyProcessor.class.getName(),
+
+		beanDefinition.getPropertyValues().addPropertyValue("address", element.getAttribute("address"));
+		beanDefinition.getPropertyValues().addPropertyValue("flushInterval", element.getAttribute("flushInterval"));
+		parserContext.getRegistry().registerBeanDefinition(Monitor.class.getName(),
 				beanDefinition);
 		return beanDefinition;
 	}

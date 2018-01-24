@@ -1,6 +1,5 @@
 package com.rpcframework.spring;
 
-import com.rpcframework.core.RpcClientBootstrap;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -12,13 +11,16 @@ import org.w3c.dom.Element;
  * @author wei.chen1
  * @since 2018/1/16
  */
-public class RpcClientParser implements BeanDefinitionParser {
+public class ClientMonitorParser implements BeanDefinitionParser {
 	@Override
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
-		beanDefinition.setBeanClass(ClientRpcServiceProxyProcessor.class);
+		beanDefinition.setBeanClass(ClientMonitor.class);
 		beanDefinition.setLazyInit(false);
-		parserContext.getRegistry().registerBeanDefinition(ClientRpcServiceProxyProcessor.class.getName(),
+
+		beanDefinition.getPropertyValues().addPropertyValue("address", element.getAttribute("address"));
+		beanDefinition.getPropertyValues().addPropertyValue("flushInterval", element.getAttribute("flushInterval"));
+		parserContext.getRegistry().registerBeanDefinition(ClientMonitor.class.getName(),
 				beanDefinition);
 		return beanDefinition;
 	}

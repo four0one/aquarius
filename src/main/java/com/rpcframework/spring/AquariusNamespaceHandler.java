@@ -6,7 +6,8 @@ public class AquariusNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override
 	public void init() {
-		registerBeanDefinitionParser("server", new RpcServerParser());
 		registerBeanDefinitionParser("registry", new RpcRegistryParser());
+		registerBeanDefinitionParser("monitor", new MonitorParser());
+		registerBeanDefinitionParser("server", new RpcServerParser());
 	}
 }

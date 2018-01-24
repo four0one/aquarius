@@ -1,5 +1,7 @@
 package com.rpcframework.core;
 
+import com.rpcframework.core.handler.RpcClientContext;
+import com.rpcframework.monitor.ServiceModel;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +41,9 @@ public class ClientTransceiver {
 		transceiverLock.lock();
 		try {
 			requestAddId(rpcRequest);
-			Channel channel = RpcClientBootstrapContext.getInstance().getChannel();
+			//获取接口的服务器地址
+			ServiceModel serviceModel = RpcClientContext.getServiceModel(rpcRequest.getService() + "#" + rpcRequest.getMethod());
+			Channel channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(),serviceModel.getPort());
 			channel.writeAndFlush(rpcRequest);
 			logger.debug("request:{}",rpcRequest);
 			respMap.put(rpcRequest.getRequestId(), NoneObject.NONE);

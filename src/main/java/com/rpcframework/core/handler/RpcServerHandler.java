@@ -25,7 +25,7 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
 			return;
 		}
 		if (msg instanceof RpcRequest) {
-			logger.info("request:{}", msg);
+			logger.debug("request:{}", msg);
 			RpcRequest request = (RpcRequest) msg;
 			RpcResponse response = new RpcResponse();
 			response.setRequestId(request.getRequestId());

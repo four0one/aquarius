@@ -6,7 +6,7 @@
     <xsd:element name="registry">
         <xsd:complexType>
             <xsd:attribute name="id" type="xsd:string" />
-            <xsd:attribute name="address" type="xsd:string" />
+            <xsd:attribute name="address" type="xsd:string" default=""/>
             <xsd:attribute name="port" type="xsd:int" />
         </xsd:complexType>
     </xsd:element>
@@ -14,6 +14,14 @@
     <xsd:element name="server">
         <xsd:complexType>
             <xsd:attribute name="id" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="monitor">
+        <xsd:complexType>
+            <xsd:attribute name="id" type="xsd:string" />
+            <xsd:attribute name="address" type="xsd:string" />
+            <xsd:attribute name="flushInterval" type="xsd:long" default="0"/>
         </xsd:complexType>
     </xsd:element>
 </xsd:schema>
