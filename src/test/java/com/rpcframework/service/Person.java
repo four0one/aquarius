@@ -14,7 +14,7 @@ public class Person implements Serializable{
 
 	private String name;
 
-//	private List<String> address = new ArrayList<>();
+	private List<String> address = new ArrayList<>();
 
 	public int getId() {
 		return id;
@@ -31,16 +31,16 @@ public class Person implements Serializable{
 	public void setName(String name) {
 		this.name = name;
 	}
-//
-//	public List<String> getAddress() {
-//		return address;
-//	}
-//
-//	public void setAddress(List<String> address) {
-//		this.address = address;
-//	}
-//
-//	public void addAddress(String address) {
-//		this.address.add(address);
-//	}
+
+	public List<String> getAddress() {
+		return address;
+	}
+
+	public void setAddress(List<String> address) {
+		this.address = address;
+	}
+
+	public void addAddress(String address) {
+		this.address.add(address);
+	}
 }

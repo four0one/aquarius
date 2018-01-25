@@ -20,8 +20,8 @@ public class DemoServiceImpl implements DemoService{
 		Person person = new Person();
 		person.setId(18);
 		person.setName(name);
-//		person.addAddress("江苏 南京");
-//		person.addAddress("上海 上海");
+		person.addAddress("江苏 南京");
+		person.addAddress("上海 上海");
 		return person;
 	}
 }

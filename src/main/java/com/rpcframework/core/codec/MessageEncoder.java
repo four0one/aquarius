@@ -1,8 +1,7 @@
 package com.rpcframework.core.codec;
 
-import com.rpcframework.core.codec.kryo.KryoSerialize;
+import com.rpcframework.core.codec.fst.FstSerialize;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
@@ -13,11 +12,11 @@ import io.netty.handler.codec.MessageToByteEncoder;
  */
 public class MessageEncoder extends MessageToByteEncoder {
 
-	private KryoSerialize kryoSerialize = new KryoSerialize();
+	private FstSerialize fstSerialize = new FstSerialize();
 
 	@Override
 	protected void encode(ChannelHandlerContext channelHandlerContext, Object o, ByteBuf byteBuf) throws Exception {
-		byte[] objectBytes = kryoSerialize.serialize(o);
+		byte[] objectBytes = fstSerialize.serialize(o);
 		if (objectBytes == null || objectBytes.length <= 0) {
 			byteBuf.writeBytes(Unpooled.copyInt(0));
 			return;

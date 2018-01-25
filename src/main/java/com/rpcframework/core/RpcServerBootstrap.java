@@ -9,6 +9,9 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.serialization.ClassResolvers;
+import io.netty.handler.codec.serialization.ObjectDecoder;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +40,9 @@ public class RpcServerBootstrap {
 					protected void initChannel(SocketChannel socketChannel) throws Exception {
 						ChannelPipeline pipeline = socketChannel.pipeline();
 						pipeline.addLast("decode",new MessageDecoder());
+//						pipeline.addLast("decode",new ObjectDecoder(ClassResolvers.cacheDisabled(this.getClass().getClassLoader())));
 						pipeline.addLast("encode",new MessageEncoder());
+//						pipeline.addLast("encode",new ObjectEncoder());
 						pipeline.addLast("idle", new IdleStateHandler(60,0,0, TimeUnit.SECONDS));
 						pipeline.addLast("rpcServerHandler", new RpcServerHandler());
 						pipeline.addLast("pongHandler", new HeartBeatServerHandler());

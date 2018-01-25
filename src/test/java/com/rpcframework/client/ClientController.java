@@ -21,7 +21,7 @@ public class ClientController {
 		String msg = demoService.hello();
 		System.out.println(msg);
 		Person person = demoService.findPerson("陈伟");
-		System.out.println(person.getName());
+		System.out.println(person.getAddress());
 
 	}
 
