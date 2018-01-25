@@ -6,6 +6,7 @@ import com.rpcframework.exception.RpcServiceBeansException;
 import com.rpcframework.filter.Filter;
 import com.rpcframework.monitor.ServiceModel;
 import com.rpcframework.utils.HttpUtils;
+import com.rpcframework.utils.ServiceSignUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 				Method[] allDeclaredMethods = ReflectionUtils.getAllDeclaredMethods(inf);
 				for (Method method : allDeclaredMethods) {
 					logger.debug("interfaceName:{} methodName:{}", inf.getName(), method.getName());
-					serviceName = inf.getName() + "#" + method.getName();
+					serviceName = ServiceSignUtils.sign(inf.getName(), method.getName());
 					RpcServiceContext.addRpcMapping(serviceName, proxy);
 					//向monitor注册服务信息
 					registServiceToMonitor(serviceName, host, port, monitor.getAddress());
@@ -78,7 +79,7 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 
 	}
 
-	private void registServiceToMonitor(String serviceName, String host, int port,String monitorAddress) {
+	private void registServiceToMonitor(String serviceName, String host, int port, String monitorAddress) {
 		HttpUtils httpUtils = HttpUtils.getInstance();
 		ServiceModel serviceModel = new ServiceModel();
 		serviceModel.setServiceName(serviceName);
@@ -88,11 +89,13 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 	}
 
 	private Object createServiceProxy(Object bean, Filter filter) {
-		ProxyFactory proxyFactory = new ProxyFactory(bean.getClass());
-		RegexpMethodPointcutAdvisor advisor = new RegexpMethodPointcutAdvisor();
-		advisor.setPattern(".*");
-		advisor.setAdvice(filter);
-		proxyFactory.addAdvisor(advisor);
+		ProxyFactory proxyFactory = new ProxyFactory(bean);
+		if (null != filter) {
+			RegexpMethodPointcutAdvisor advisor = new RegexpMethodPointcutAdvisor();
+			advisor.setPattern(".*");
+			advisor.setAdvice(filter);
+			proxyFactory.addAdvisor(advisor);
+		}
 		return proxyFactory.getProxy();
 	}
 }

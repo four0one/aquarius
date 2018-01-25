@@ -9,13 +9,15 @@ import java.util.Arrays;
  */
 public class RpcRequest implements Serializable {
 
-	private String method;
+	private String methodName;
 
 	private String service;
 
 	private Object[] parameters;
 
 	private String requestId;
+
+	private Class<?>[] parameterTypes;
 
 	public String getRequestId() {
 		return requestId;
@@ -25,12 +27,12 @@ public class RpcRequest implements Serializable {
 		this.requestId = requestId;
 	}
 
-	public String getMethod() {
-		return method;
+	public String getMethodName() {
+		return methodName;
 	}
 
-	public void setMethod(String method) {
-		this.method = method;
+	public void setMethodName(String methodName) {
+		this.methodName = methodName;
 	}
 
 	public String getService() {
@@ -49,10 +51,18 @@ public class RpcRequest implements Serializable {
 		this.parameters = parameters;
 	}
 
+	public Class<?>[] getParameterTypes() {
+		return parameterTypes;
+	}
+
+	public void setParameterTypes(Class<?>[] parameterTypes) {
+		this.parameterTypes = parameterTypes;
+	}
+
 	@Override
 	public String toString() {
 		return "RpcRequest{" +
-				"method='" + method + '\'' +
+				"methodName='" + methodName + '\'' +
 				", service='" + service + '\'' +
 				", parameters=" + Arrays.toString(parameters) +
 				", requestId='" + requestId + '\'' +

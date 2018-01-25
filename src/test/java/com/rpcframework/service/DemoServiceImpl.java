@@ -14,4 +14,14 @@ public class DemoServiceImpl implements DemoService{
 	public String hello() {
 		return "真的hello";
 	}
+
+	@Override
+	public Person findPerson(String name) {
+		Person person = new Person();
+		person.setId(18);
+		person.setName(name);
+//		person.addAddress("江苏 南京");
+//		person.addAddress("上海 上海");
+		return person;
+	}
 }

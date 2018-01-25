@@ -1,8 +1,10 @@
 package com.rpcframework.client;
 
 import com.rpcframework.annotation.RpcResource;
+import com.rpcframework.core.codec.kryo.KryoFactoryPool;
 import com.rpcframework.service.DemoService;
 import com.rpcframework.service.DemoServiceImpl;
+import com.rpcframework.service.Person;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,7 +18,11 @@ public class ClientController {
 	private DemoService demoService;
 
 	public void say(){
-		String msgId = demoService.hello();
+		String msg = demoService.hello();
+		System.out.println(msg);
+		Person person = demoService.findPerson("陈伟");
+		System.out.println(person.getName());
+
 	}
 
 }

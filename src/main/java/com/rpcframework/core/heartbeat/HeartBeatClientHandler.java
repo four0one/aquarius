@@ -3,6 +3,7 @@ package com.rpcframework.core.heartbeat;
 import com.rpcframework.core.RpcClientBootstrapContext;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author wei.chen1
  * @since 2018/1/16
  */
+@ChannelHandler.Sharable
 public class HeartBeatClientHandler extends ChannelInboundHandlerAdapter {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());

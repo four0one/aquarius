@@ -45,7 +45,7 @@ public class RpcServerBootstrap {
 				}).option(ChannelOption.SO_BACKLOG, 128)
 				.childOption(ChannelOption.SO_KEEPALIVE, true);
 		try {
-			ChannelFuture channelFuture = bootstrap.bind().sync();
+			ChannelFuture channelFuture = bootstrap.bind();
 			int finalPort = port;
 			channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
 				if (channelFuture1.isSuccess()) {

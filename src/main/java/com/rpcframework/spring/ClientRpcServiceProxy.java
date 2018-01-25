@@ -60,8 +60,10 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 	@Override
 	public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
 		RpcRequest request = new RpcRequest();
-		request.setMethod(method.getName());
+		request.setMethodName(method.getName());
 		request.setParameters(objects);
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		request.setParameterTypes(parameterTypes);
 		Class<?>[] interfaces = o.getClass().getInterfaces();
 		if (interfaces == null || interfaces.length == 1) {
 			throw new RpcRequestException("rpc请求失败，该服务不是接口");
@@ -80,7 +82,7 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 			}
 		});
 		RpcResponse response = responseFuture.get();
-		//TODO 返回结果
-		return null;
+		logger.debug("requestId:{},return data {}",response.getRequestId(),response.getResult());
+		return response.getResult();
 	}
 }

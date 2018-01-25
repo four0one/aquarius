@@ -1,5 +1,6 @@
 package com.rpcframework.core.heartbeat;
 
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleState;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
  * @author wei.chen1
  * @since 2018/1/16
  */
+@ChannelHandler.Sharable
 public class HeartBeatServerHandler extends ChannelInboundHandlerAdapter {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());

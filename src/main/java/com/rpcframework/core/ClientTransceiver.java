@@ -2,6 +2,7 @@ package com.rpcframework.core;
 
 import com.rpcframework.core.handler.RpcClientContext;
 import com.rpcframework.monitor.ServiceModel;
+import com.rpcframework.utils.ServiceSignUtils;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,9 @@ public class ClientTransceiver {
 		try {
 			requestAddId(rpcRequest);
 			//获取接口的服务器地址
-			ServiceModel serviceModel = RpcClientContext.getServiceModel(rpcRequest.getService() + "#" + rpcRequest.getMethod());
+			ServiceModel serviceModel = RpcClientContext.getServiceModel(
+					ServiceSignUtils.sign(rpcRequest.getService(),rpcRequest.getMethodName())
+			);
 			Channel channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(),serviceModel.getPort());
 			channel.writeAndFlush(rpcRequest);
 			logger.debug("request:{}",rpcRequest);

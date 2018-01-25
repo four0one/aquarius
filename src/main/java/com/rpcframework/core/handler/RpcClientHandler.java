@@ -6,6 +6,7 @@ import com.rpcframework.core.RpcRequest;
 import com.rpcframework.core.RpcResponse;
 import com.rpcframework.core.heartbeat.Pong;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
  * @author wei.chen1
  * @since 2018/1/16
  */
+@ChannelHandler.Sharable
 public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());

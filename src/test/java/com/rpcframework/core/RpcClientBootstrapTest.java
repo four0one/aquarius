@@ -17,14 +17,17 @@ import static org.junit.Assert.*;
 public class RpcClientBootstrapTest {
 
 	public static void main(String[] args) {
-		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
+		/*ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
 		ClientController bean = context.getBean(ClientController.class);
 		ClientRunnable clientRunnable = new ClientRunnable(bean);
 		Thread t;
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 1; i++) {
 			t = new Thread(clientRunnable);
 			t.start();
-		}
+		}*/
+		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
+		ClientController bean = context.getBean(ClientController.class);
+		bean.say();
 	}
 
 
