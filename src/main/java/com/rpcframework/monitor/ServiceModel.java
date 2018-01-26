@@ -56,13 +56,12 @@ public class ServiceModel implements Serializable{
 		if (o == null || getClass() != o.getClass()) return false;
 		ServiceModel that = (ServiceModel) o;
 		return port == that.port &&
-				Objects.equal(serviceName, that.serviceName) &&
 				Objects.equal(host, that.host);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(serviceName, host, port);
+		return Objects.hashCode(host, port);
 	}
 
 	public String toHashString() {

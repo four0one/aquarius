@@ -64,7 +64,7 @@ public class ClientMonitor implements InitializingBean {
 		Set<ServiceModel> serviceModelSet = new HashSet<>();
 		Set<String> keySet = serviceMap.keySet();
 		for (String key : keySet) {
-			List<ServiceModel> serviceModels = (List<ServiceModel>) (serviceMap.get(key));
+			List<ServiceModel> serviceModels = serviceMap.get(key);
 			for (ServiceModel model : serviceModels) {
 				serviceModelSet.add(model);
 			}

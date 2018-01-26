@@ -4,6 +4,7 @@ import com.rpcframework.core.codec.MessageDecoder;
 import com.rpcframework.core.codec.MessageEncoder;
 import com.rpcframework.core.handler.RpcClientHandler;
 import com.rpcframework.core.heartbeat.HeartBeatClientHandler;
+import com.rpcframework.core.heartbeat.ReconnectProcessor;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -61,24 +62,14 @@ public class RpcClientBootstrap {
 		}
 	}
 
-	public void restart() {
-		int count = context.getRestartCount().decrementAndGet();
-		if (count <= 0) {
-			context.getScheduledFuture().cancel(false);
-			logger.debug("3次重连结束，无法连接到服务端");
-			group.shutdownGracefully();
-			return;
-		}
+	public void restart(ReconnectProcessor processor) {
 		try {
-			ChannelFuture future = bootstrap.connect().sync();
+			ChannelFuture future = bootstrap.connect();
 			future.addListener((ChannelFutureListener) channelFuture -> {
-				logger.debug("重连结果{}", channelFuture.isSuccess());
 				if (channelFuture.isSuccess()) {
-					context.getScheduledFuture().cancel(false);
+					processor.cancel(true);
 				}
 			});
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		} catch (Exception e) {
 			logger.error("{}", e);
 		}
