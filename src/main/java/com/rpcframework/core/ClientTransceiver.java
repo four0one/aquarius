@@ -1,6 +1,10 @@
 package com.rpcframework.core;
 
-import com.rpcframework.core.handler.RpcClientContext;
+import com.rpcframework.core.executor.ClientExecutor;
+import com.rpcframework.core.executor.ClientExecutorContext;
+import com.rpcframework.core.executor.HashExecutor;
+import com.rpcframework.core.executor.SimpleExecutor;
+import com.rpcframework.core.handler.ServiceRegistMapContext;
 import com.rpcframework.monitor.ServiceModel;
 import com.rpcframework.utils.ServiceSignUtils;
 import io.netty.channel.Channel;
@@ -27,7 +31,6 @@ public class ClientTransceiver {
 	private final Condition respArrive = transceiverLock.newCondition();
 	private final Map<String, Object> respMap = new ConcurrentHashMap();
 
-	//workerid和dcid要配置
 	private SnowflakeIdWorker idWorker = new SnowflakeIdWorker(0, 0);
 
 	private static class ClientTransceiverHolder {
@@ -41,14 +44,9 @@ public class ClientTransceiver {
 	public RpcResponse sendRequest(RpcRequest rpcRequest) {
 		transceiverLock.lock();
 		try {
-			requestAddId(rpcRequest);
-			//获取接口的服务器地址
-			ServiceModel serviceModel = RpcClientContext.getServiceModel(
-					ServiceSignUtils.sign(rpcRequest.getService(),rpcRequest.getMethodName())
-			);
-			Channel channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(),serviceModel.getPort());
-			channel.writeAndFlush(rpcRequest);
-			logger.debug("request:{}",rpcRequest);
+			ClientExecutor simpleExecutor = new SimpleExecutor();
+			ClientExecutor hashExecutor = new HashExecutor(simpleExecutor);
+			hashExecutor.execute(rpcRequest, new ClientExecutorContext());
 			respMap.put(rpcRequest.getRequestId(), NoneObject.NONE);
 			respArrive.await();
 			//接收到线程响应

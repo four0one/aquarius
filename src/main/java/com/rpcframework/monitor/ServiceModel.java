@@ -64,4 +64,20 @@ public class ServiceModel implements Serializable{
 	public int hashCode() {
 		return Objects.hashCode(serviceName, host, port);
 	}
+
+	public String toHashString() {
+		return "ServiceModel{" +
+				"serviceName='" + serviceName + '\'' +
+				", host='" + host + '\'' +
+				", port=" + port +
+				'}';
+	}
+
+	@Override
+	public String toString() {
+		return "ServiceModel{" +
+				"host='" + host + '\'' +
+				", port=" + port +
+				'}';
+	}
 }

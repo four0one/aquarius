@@ -1,15 +1,17 @@
 package com.rpcframework.spring;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rpcframework.core.RpcClientBootstrap;
-import com.rpcframework.core.handler.RpcClientContext;
+import com.rpcframework.core.handler.ServiceRegistMapContext;
 import com.rpcframework.monitor.ServiceModel;
 import com.rpcframework.utils.HttpUtils;
 import org.springframework.beans.factory.InitializingBean;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -52,6 +54,13 @@ public class ClientMonitor implements InitializingBean {
 		}
 
 		//打开channel
+		openServiceChannel(serviceMap);
+
+		ServiceRegistMapContext.addServiceModel(serviceMap);
+
+	}
+
+	private void openServiceChannel(Map<String, List<ServiceModel>> serviceMap) {
 		Set<ServiceModel> serviceModelSet = new HashSet<>();
 		Set<String> keySet = serviceMap.keySet();
 		for (String key : keySet) {
@@ -66,8 +75,5 @@ public class ClientMonitor implements InitializingBean {
 			clientBootstrap = new RpcClientBootstrap(model.getHost(), model.getPort());
 			clientBootstrap.start();
 		}
-
-		RpcClientContext.addServiceModel(serviceMap);
-
 	}
 }
