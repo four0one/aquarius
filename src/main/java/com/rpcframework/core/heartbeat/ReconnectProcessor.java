@@ -22,6 +22,15 @@ public class ReconnectProcessor {
 
 	private ScheduledFuture<?> scheduledFuture;
 
+	private String host;
+
+	private int port;
+
+	public ReconnectProcessor(String host, int port) {
+		this.host = host;
+		this.port = port;
+	}
+
 	public void reconnect() {
 		scheduledFuture = scheduledExecutor.scheduleAtFixedRate
 				(new ReconnectRunnable(this), 0, 5, TimeUnit.SECONDS);
@@ -32,6 +41,9 @@ public class ReconnectProcessor {
 			logger.debug("重连成功");
 		} else {
 			logger.debug("重连3次依然失败");
+			RpcClientBootstrapContext context = RpcClientBootstrapContext.getInstance();
+			context.addFailureChannel(host, port);
+			context.removeChannel(host, port);
 		}
 		scheduledFuture.cancel(false);
 	}
@@ -55,7 +67,7 @@ public class ReconnectProcessor {
 			}
 			logger.debug("重连...第{}次", reconnCnt);
 			RpcClientBootstrapContext context = RpcClientBootstrapContext.getInstance();
-			context.getBootstrap().restart(processor);
+			context.getBootstrap(host, port).restart(processor);
 			reconnCnt++;
 		}
 	}

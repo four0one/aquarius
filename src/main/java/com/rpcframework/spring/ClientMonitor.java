@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -53,23 +54,26 @@ public class ClientMonitor implements InitializingBean {
 			throw new Exception("客户端同步服务注册表信息为空");
 		}
 
-		//打开channel
-		openServiceChannel(serviceMap);
-
-		ServiceRegistMapContext.addServiceModel(serviceMap);
-
-	}
-
-	private void openServiceChannel(Map<String, List<ServiceModel>> serviceMap) {
+		//去重服务器地址
 		Set<ServiceModel> serviceModelSet = new HashSet<>();
 		Set<String> keySet = serviceMap.keySet();
+		CopyOnWriteArrayList copyList = null;
 		for (String key : keySet) {
+			copyList = new CopyOnWriteArrayList();
 			List<ServiceModel> serviceModels = serviceMap.get(key);
 			for (ServiceModel model : serviceModels) {
 				serviceModelSet.add(model);
+				copyList.add(model);
 			}
+			ServiceRegistMapContext.addServiceModel(key,copyList);
 		}
 
+		//打开channel
+		openServiceChannel(serviceModelSet);
+
+	}
+
+	private void openServiceChannel(Set<ServiceModel> serviceModelSet) {
 		RpcClientBootstrap clientBootstrap = null;
 		for (ServiceModel model : serviceModelSet) {
 			clientBootstrap = new RpcClientBootstrap(model.getHost(), model.getPort());

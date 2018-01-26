@@ -28,7 +28,7 @@ public class ConsistencyHashService {
 		initServer(serviceModes);
 	}
 
-	private void initServer(List<ServiceModel> serviceModes) {
+	public void initServer(List<ServiceModel> serviceModes) {
 
 		for (ServiceModel realService : serviceModes) {
 			for (int i = 0; i < VIRTUAL_NODES; i++) {

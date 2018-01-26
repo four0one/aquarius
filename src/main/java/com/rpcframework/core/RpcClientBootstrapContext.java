@@ -8,6 +8,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -16,63 +18,54 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RpcClientBootstrapContext {
 
-	private RpcClientBootstrap bootstrap;
+	private Map<String, RpcClientBootstrap> bootstrapMap = new HashMap<>();
 
-	private Channel channel;
-	private Map<String, Channel> channelMap = new HashMap<>();
+	private Map<String, Channel> channelMap = new ConcurrentHashMap<>();
 
+	private CopyOnWriteArrayList failureChannel = new CopyOnWriteArrayList();
 
-	private ScheduledFuture<?> scheduledFuture;
-
-	private AtomicInteger restartCount = new AtomicInteger(3);
+	public void addBootstrap(String host, int port, RpcClientBootstrap rpcClientBootstrap) {
+		bootstrapMap.put(hostAndPort(host, port), rpcClientBootstrap);
+	}
 
 	private static class ContextHolder {
 		private static RpcClientBootstrapContext INSTANCE = new RpcClientBootstrapContext();
 	}
 
-	public RpcClientBootstrap getBootstrap() {
-		return bootstrap;
+	public RpcClientBootstrap getBootstrap(String host, int port) {
+		return bootstrapMap.get(hostAndPort(host, port));
 	}
 
-	public void setBootstrap(RpcClientBootstrap bootstrap) {
-		this.bootstrap = bootstrap;
-	}
 
 	public static RpcClientBootstrapContext getInstance() {
 		return ContextHolder.INSTANCE;
 	}
 
 	public Channel getChannel(String host, int port) {
-		StringBuffer hostAndPort = hostAndPort(host, port);
-		return channelMap.get(hostAndPort.toString());
+		return channelMap.get(hostAndPort(host, port));
+	}
+
+	public Channel removeChannel(String host, int port) {
+		return channelMap.remove(hostAndPort(host, port));
 	}
 
 	public void setChannel(Channel channel) {
 		InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
-		StringBuffer hostAndPort = hostAndPort(socketAddress.getHostString(), socketAddress.getPort());
-		channelMap.put(hostAndPort.toString(), channel);
+		channelMap.put(hostAndPort(socketAddress.getHostString(), socketAddress.getPort()), channel);
 	}
 
-	private StringBuffer hostAndPort(String host, int port) {
+	private String hostAndPort(String host, int port) {
 		StringBuffer hostAndPort = new StringBuffer(host);
 		hostAndPort.append(":");
 		hostAndPort.append(port);
-		return hostAndPort;
+		return hostAndPort.toString();
 	}
 
-	public AtomicInteger getRestartCount() {
-		return restartCount;
+	public void addFailureChannel(String host, int port) {
+		failureChannel.add(hostAndPort(host, port));
 	}
 
-	public void setRestartCount(AtomicInteger restartCount) {
-		this.restartCount = restartCount;
-	}
-
-	public ScheduledFuture<?> getScheduledFuture() {
-		return scheduledFuture;
-	}
-
-	public void setScheduledFuture(ScheduledFuture<?> scheduledFuture) {
-		this.scheduledFuture = scheduledFuture;
+	public CopyOnWriteArrayList<String> getFailureChannel() {
+		return failureChannel;
 	}
 }

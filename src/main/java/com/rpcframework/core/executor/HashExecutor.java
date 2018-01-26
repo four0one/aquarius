@@ -29,18 +29,28 @@ public class HashExecutor implements ClientExecutor {
 	@Override
 	public void execute(RpcRequest rpcRequest, ClientExecutorContext ctx) {
 		requestAddId(rpcRequest);
-		List<ServiceModel> serviceModels = ServiceRegistMapContext.getServiceModels(
-				ServiceSignUtils.sign(rpcRequest.getService(), rpcRequest.getMethodName())
-		);
-		ConsistencyHashService hashService = new ConsistencyHashService(serviceModels);
-		ServiceModel serviceModel = hashService.getServer(rpcRequest.toString());
-		mappingChannel(ctx, serviceModel);
+		String serviceName = ServiceSignUtils.sign(rpcRequest.getService(), rpcRequest.getMethodName());
+		Channel channel = requestHashChannel(rpcRequest, serviceName);
+		if (channel == null) {
+
+		}
+		ctx.setChannel(channel);
 		simpleExecutor.execute(rpcRequest, ctx);
 	}
 
-	private void mappingChannel(ClientExecutorContext ctx, ServiceModel serviceModel) {
-		Channel channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(), serviceModel.getPort());
-		ctx.setChannel(channel);
+	private Channel requestHashChannel(RpcRequest rpcRequest, String serviceName) {
+		Channel channel = null;
+		List<ServiceModel> serviceModels = ServiceRegistMapContext.getServiceModels(serviceName);
+		ConsistencyHashService hashService = new ConsistencyHashService(serviceModels);
+		do {
+			ServiceModel serviceModel = hashService.getServer(rpcRequest.toString());
+			channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(), serviceModel.getPort());
+			if (null == channel) {
+				serviceModels.remove(serviceModel);
+				hashService.initServer(serviceModels);
+			}
+		} while (channel == null && serviceModels.size() != 0);
+		return channel;
 	}
 
 

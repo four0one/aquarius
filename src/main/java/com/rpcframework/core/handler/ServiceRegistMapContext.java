@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ServiceRegistMapContext {
 
@@ -18,8 +19,8 @@ public class ServiceRegistMapContext {
 		return rpcServiceMapping.get(serviceName).get(0);
 	}
 
-	public static void addServiceModel(Map<String, List<ServiceModel>> map) {
-		rpcServiceMapping.putAll(map);
+	public static void addServiceModel(String serviceName, CopyOnWriteArrayList list) {
+		rpcServiceMapping.put(serviceName, list);
 	}
 
 	public static List<ServiceModel> getServiceModels(String serviceName) {

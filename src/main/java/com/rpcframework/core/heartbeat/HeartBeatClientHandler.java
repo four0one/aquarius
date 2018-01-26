@@ -9,6 +9,8 @@ import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -24,7 +26,6 @@ public class HeartBeatClientHandler extends ChannelInboundHandlerAdapter {
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		logger.debug("客户端连接激活");
 		RpcClientBootstrapContext.getInstance().setChannel(ctx.channel());
-		RpcClientBootstrapContext.getInstance().setRestartCount(new AtomicInteger(3));
 		ctx.fireChannelActive();
 	}
 
@@ -50,8 +51,11 @@ public class HeartBeatClientHandler extends ChannelInboundHandlerAdapter {
 
 	@Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-		logger.debug("连接关闭，将进行重连");
-		ReconnectProcessor processor = new ReconnectProcessor();
+		InetSocketAddress inetSocketAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+		String host = inetSocketAddress.getHostString();
+		int port = inetSocketAddress.getPort();
+		logger.debug("连接关闭，将进行重连.{}:{}", host, port);
+		ReconnectProcessor processor = new ReconnectProcessor(host,port);
 		processor.reconnect();
 	}
 
