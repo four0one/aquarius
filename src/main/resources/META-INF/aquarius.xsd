@@ -13,7 +13,7 @@
 
     <xsd:element name="server">
         <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" />
+            <xsd:attribute name="id" type="xsd:string" default="aquarius-server"/>
         </xsd:complexType>
     </xsd:element>
 

@@ -5,11 +5,13 @@ import com.rpcframework.core.handler.RpcServiceContext;
 import com.rpcframework.exception.RpcServiceBeansException;
 import com.rpcframework.filter.Filter;
 import com.rpcframework.monitor.ServiceModel;
+import com.rpcframework.utils.AopTargetUtils;
 import com.rpcframework.utils.HttpUtils;
 import com.rpcframework.utils.ServiceSignUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.RegexpMethodPointcutAdvisor;
 import org.springframework.beans.BeansException;
@@ -18,6 +20,7 @@ import org.springframework.context.support.ApplicationObjectSupport;
 import org.springframework.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -55,7 +58,7 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 		for (String beanName : keySet) {
 			Object bean = beansWithAnnotation.get(beanName);
 			Filter filter = null;
-			RpcService rpcServiceAnno = bean.getClass().getAnnotation(RpcService.class);
+			RpcService rpcServiceAnno = AopTargetUtils.getTarget(bean).getClass().getAnnotation(RpcService.class);
 			Class filterClass = rpcServiceAnno.filter();
 			if (!filterClass.isAssignableFrom(Filter.NONE.class)) {
 				filter = (Filter) context.getBean(filterClass);
@@ -66,6 +69,9 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 			Class<?>[] interfaces = bean.getClass().getInterfaces();
 			String serviceName = null;
 			for (Class inf : interfaces) {
+				if (inf.isAssignableFrom(Advised.class)) {
+					continue;
+				}
 				Method[] allDeclaredMethods = ReflectionUtils.getAllDeclaredMethods(inf);
 				for (Method method : allDeclaredMethods) {
 					logger.debug("interfaceName:{} methodName:{}", inf.getName(), method.getName());
