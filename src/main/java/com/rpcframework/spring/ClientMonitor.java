@@ -3,6 +3,8 @@ package com.rpcframework.spring;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rpcframework.core.RpcClientBootstrap;
+import com.rpcframework.core.executor.ConsistencyHashRing;
+import com.rpcframework.core.executor.ConsistencyHashService;
 import com.rpcframework.core.handler.ServiceRegistMapContext;
 import com.rpcframework.monitor.ServiceModel;
 import com.rpcframework.utils.HttpUtils;
@@ -48,8 +50,9 @@ public class ClientMonitor implements InitializingBean {
 	public void afterPropertiesSet() throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		HttpUtils httpUtils = HttpUtils.getInstance();
-		String result = httpUtils.getJson(address+"/services/load");
-		Map<String,List<ServiceModel>> serviceMap = mapper.readValue(result,new TypeReference<Map<String,List<ServiceModel>>>(){});
+		String result = httpUtils.getJson(address + "/services/load");
+		Map<String, List<ServiceModel>> serviceMap = mapper.readValue(result, new TypeReference<Map<String, List<ServiceModel>>>() {
+		});
 		if (null == serviceMap || serviceMap.isEmpty()) {
 			throw new Exception("客户端同步服务注册表信息为空");
 		}
@@ -65,7 +68,10 @@ public class ClientMonitor implements InitializingBean {
 				serviceModelSet.add(model);
 				copyList.add(model);
 			}
-			ServiceRegistMapContext.addServiceModel(key,copyList);
+			ServiceRegistMapContext.addServiceModel(key, copyList);
+			ConsistencyHashService hashService = new ConsistencyHashService();
+			ConsistencyHashRing hashRing = hashService.generateHashRing(serviceModels);
+			ServiceRegistMapContext.addRpcServiceHashRing(key, hashRing);
 		}
 
 		//打开channel

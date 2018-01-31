@@ -1,12 +1,13 @@
 package com.rpcframework.core.executor;
 
 import com.rpcframework.monitor.ServiceModel;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.ws.ServiceMode;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * @author wei.chen1
@@ -23,6 +24,10 @@ public class ConsistencyHashService {
 	//虚拟节点的数目
 	private final int VIRTUAL_NODES = 6;
 
+
+	public ConsistencyHashService() {
+	}
+
 	public ConsistencyHashService(List<ServiceModel> serviceModes) {
 		this.virtualNodes = new TreeMap<>();
 		initServer(serviceModes);
@@ -38,6 +43,20 @@ public class ConsistencyHashService {
 				virtualNodes.put(hash, vsn);
 			}
 		}
+	}
+
+	public ConsistencyHashRing generateHashRing(List<ServiceModel> serviceModes) {
+		ConsistencyHashRing ring = new ConsistencyHashRing();
+		VirtualServiceNode vsn;
+		for (ServiceModel realService : serviceModes) {
+			for (int i = 0; i < VIRTUAL_NODES; i++) {
+				vsn = new VirtualServiceNode(realService, i);
+				int hash = getHash(vsn.toHashString());
+				logger.debug("虚拟节点[" + vsn + "]被添加, hash值为" + hash);
+				ring.putVirtualNodes(hash, vsn);
+			}
+		}
+		return ring;
 	}
 
 	//使用FNV1_32_HASH算法计算服务器的Hash值,这里不使用重写hashCode的方法，最终效果没区别
@@ -83,6 +102,32 @@ public class ConsistencyHashService {
 		return null;
 	}
 
+	//得到应当路由到的结点
+	public ServiceModel getServer(String key,ConsistencyHashRing hashRing) {
+		//得到该key的hash值
+		int hash = getHash(key);
+		// 得到大于该Hash值的所有Map
+		SortedMap<Integer, VirtualServiceNode> virtualNodes = hashRing.getVirtualNodes();
+		SortedMap<Integer, VirtualServiceNode> subMap = virtualNodes.tailMap(hash);
+		VirtualServiceNode virtualNode;
+		if (subMap.isEmpty()) {
+			//如果没有比该key的hash值大的，则从第一个node开始
+			Integer i = virtualNodes.firstKey();
+			//返回对应的服务器
+			virtualNode = virtualNodes.get(i);
+		} else {
+			//第一个Key就是顺时针过去离node最近的那个结点
+			Integer i = subMap.firstKey();
+			//返回对应的服务器
+			virtualNode = subMap.get(i);
+		}
+		//virtualNode虚拟节点名称要截取一下
+		if (virtualNode != null) {
+			return virtualNode.getRealServiceNode();
+		}
+		return null;
+	}
+
 	public static void main(String[] args) {
 		List<ServiceModel> serviceModels = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
@@ -99,43 +144,5 @@ public class ConsistencyHashService {
 		System.out.println(serviceModel2.getHost() + ":" + serviceModel2.getPort());
 	}
 
-
-	private class VirtualServiceNode {
-		private ServiceModel realServiceNode;
-
-		private String virtualNode = "vn";
-
-		private int i;
-
-		public VirtualServiceNode(ServiceModel realServiceNode, int i) {
-			this.realServiceNode = realServiceNode;
-			this.i = i;
-		}
-
-		public ServiceModel getRealServiceNode() {
-			return realServiceNode;
-		}
-
-		public void setRealServiceNode(ServiceModel realServiceNode) {
-			this.realServiceNode = realServiceNode;
-		}
-
-		public String toHashString() {
-			return "VirtualServiceNode{" +
-					"realServiceNode=" + realServiceNode.toHashString() +
-					", virtualNode='" + virtualNode + '\'' +
-					", i=" + i +
-					'}';
-		}
-
-		@Override
-		public String toString() {
-			return "VirtualServiceNode{" +
-					"realServiceNode=" + realServiceNode +
-					", virtualNode='" + virtualNode + '\'' +
-					", i=" + i +
-					'}';
-		}
-	}
 
 }

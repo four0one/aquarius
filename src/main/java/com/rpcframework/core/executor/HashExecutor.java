@@ -22,6 +22,8 @@ public class HashExecutor implements ClientExecutor {
 
 	private SnowflakeIdWorker idWorker = new SnowflakeIdWorker(1, 1);
 
+	private ConsistencyHashService hashService = new ConsistencyHashService();
+
 	public HashExecutor(ClientExecutor simpleExecutor) {
 		this.simpleExecutor = simpleExecutor;
 	}
@@ -40,16 +42,17 @@ public class HashExecutor implements ClientExecutor {
 
 	private Channel requestHashChannel(RpcRequest rpcRequest, String serviceName) {
 		Channel channel = null;
-		List<ServiceModel> serviceModels = ServiceRegistMapContext.getServiceModels(serviceName);
-		ConsistencyHashService hashService = new ConsistencyHashService(serviceModels);
+		ConsistencyHashRing serviceHashRing = ServiceRegistMapContext.getServiceHashRing(serviceName);
 		do {
-			ServiceModel serviceModel = hashService.getServer(rpcRequest.toString());
+			ServiceModel serviceModel = hashService.getServer(rpcRequest.toString(), serviceHashRing);
 			channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(), serviceModel.getPort());
 			if (null == channel) {
+				List<ServiceModel> serviceModels = ServiceRegistMapContext.getServiceModels(serviceName);
 				serviceModels.remove(serviceModel);
-				hashService.initServer(serviceModels);
+				serviceHashRing = hashService.generateHashRing(serviceModels);
+				ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceHashRing);
 			}
-		} while (channel == null && serviceModels.size() != 0);
+		} while (channel == null && serviceHashRing.getVirtualNodes().size() != 0);
 		return channel;
 	}
 
