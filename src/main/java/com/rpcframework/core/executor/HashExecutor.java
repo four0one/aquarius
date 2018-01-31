@@ -30,7 +30,6 @@ public class HashExecutor implements ClientExecutor {
 
 	@Override
 	public void execute(RpcRequest rpcRequest, ClientExecutorContext ctx) {
-		requestAddId(rpcRequest);
 		String serviceName = ServiceSignUtils.sign(rpcRequest.getService(), rpcRequest.getMethodName());
 		Channel channel = requestHashChannel(rpcRequest, serviceName);
 		if (channel == null) {
@@ -54,13 +53,6 @@ public class HashExecutor implements ClientExecutor {
 			}
 		} while (channel == null && serviceHashRing.getVirtualNodes().size() != 0);
 		return channel;
-	}
-
-
-	private void requestAddId(RpcRequest rpcRequest) {
-		long id = idWorker.nextId();
-		String requestId = String.valueOf(id);
-		rpcRequest.setRequestId(requestId);
 	}
 
 }

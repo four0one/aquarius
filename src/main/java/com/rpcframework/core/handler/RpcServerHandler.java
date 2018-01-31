@@ -28,7 +28,7 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private ExecutorService serviceCallThreadPool = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+	private ExecutorService serviceCallThreadPool = Executors.newFixedThreadPool(8);
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -40,8 +40,16 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
 			logger.debug("request:{}", msg);
 			RpcRequest request = (RpcRequest) msg;
 			//开启线程调用服务
-			Future<RpcResponse> responseFuture = serviceCallThreadPool.submit(new ServiceInvokeCallable(request));
-			RpcResponse response = responseFuture.get();
+//			Future<RpcResponse> responseFuture = serviceCallThreadPool.submit(new ServiceInvokeCallable(request));
+//			RpcResponse response = responseFuture.get();
+			RpcResponse response = new RpcResponse();
+			response.setRequestId(request.getRequestId());
+			String serviceName = ServiceSignUtils.sign(request.getService(), request.getMethodName());
+			Object target = RpcServiceContext.getRpcTarget(serviceName);
+			Class<?> targetClass = Class.forName(request.getService());
+			Method method = targetClass.getMethod(request.getMethodName(), request.getParameterTypes());
+			Object result = ReflectionUtils.invokeMethod(method, target, request.getParameters());
+			response.setResult(result);
 			ctx.writeAndFlush(response);
 			return;
 		}
