@@ -67,7 +67,7 @@ public class ReconnectProcessor {
 			}
 			logger.debug("重连...第{}次", reconnCnt);
 			RpcClientBootstrapContext context = RpcClientBootstrapContext.getInstance();
-			context.getBootstrap(host, port).restart(processor);
+			context.getPooledChannelHolder(host, port).reconnectChannel(processor);
 			reconnCnt++;
 		}
 	}

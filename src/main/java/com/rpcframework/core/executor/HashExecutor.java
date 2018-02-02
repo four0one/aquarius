@@ -4,6 +4,7 @@ import com.rpcframework.core.RpcClientBootstrapContext;
 import com.rpcframework.core.RpcRequest;
 import com.rpcframework.core.SnowflakeIdWorker;
 import com.rpcframework.core.handler.ServiceRegistMapContext;
+import com.rpcframework.core.pool.PooledChannel;
 import com.rpcframework.monitor.ServiceModel;
 import com.rpcframework.utils.ServiceSignUtils;
 import io.netty.channel.Channel;
@@ -31,16 +32,16 @@ public class HashExecutor implements ClientExecutor {
 	@Override
 	public void execute(RpcRequest rpcRequest, ClientExecutorContext ctx) {
 		String serviceName = ServiceSignUtils.sign(rpcRequest.getService(), rpcRequest.getMethodName());
-		Channel channel = requestHashChannel(rpcRequest, serviceName);
+		PooledChannel channel = requestHashChannel(rpcRequest, serviceName);
 		if (channel == null) {
-
+			return;
 		}
 		ctx.setChannel(channel);
 		simpleExecutor.execute(rpcRequest, ctx);
 	}
 
-	private Channel requestHashChannel(RpcRequest rpcRequest, String serviceName) {
-		Channel channel = null;
+	private PooledChannel requestHashChannel(RpcRequest rpcRequest, String serviceName) {
+		PooledChannel channel = null;
 		ConsistencyHashRing serviceHashRing = ServiceRegistMapContext.getServiceHashRing(serviceName);
 		do {
 			ServiceModel serviceModel = hashService.getServer(rpcRequest.toString(), serviceHashRing);

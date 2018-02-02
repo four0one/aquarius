@@ -1,6 +1,8 @@
 package com.rpcframework.core;
 
 
+import com.rpcframework.core.pool.PooledChannel;
+import com.rpcframework.core.pool.PooledChannelHolder;
 import io.netty.channel.Channel;
 import io.netty.util.concurrent.ScheduledFuture;
 import org.apache.commons.lang3.RandomUtils;
@@ -24,6 +26,7 @@ public class RpcClientBootstrapContext {
 	private Map<String, RpcClientBootstrap> bootstrapMap = new HashMap<>();
 
 	private Map<String, List<Channel>> channelMap = new ConcurrentHashMap<>();
+	private Map<String, PooledChannelHolder> pooledChannelHolderMap = new ConcurrentHashMap<>();
 
 	private CopyOnWriteArrayList failureChannel = new CopyOnWriteArrayList();
 
@@ -44,9 +47,9 @@ public class RpcClientBootstrapContext {
 		return ContextHolder.INSTANCE;
 	}
 
-	public Channel getChannel(String host, int port) {
-		List<Channel> channels = channelMap.get(hostAndPort(host, port));
-		return channels.get(RandomUtils.nextInt(0,10));
+	public PooledChannel getChannel(String host, int port) {
+		PooledChannelHolder holder = pooledChannelHolderMap.get(hostAndPort(host, port));
+		return holder.popChannel();
 	}
 
 	public void removeChannel(String host, int port) {
@@ -56,9 +59,9 @@ public class RpcClientBootstrapContext {
 	public void setChannel(Channel channel) {
 		InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
 		String key = hostAndPort(socketAddress.getHostString(), socketAddress.getPort());
-		if(channelMap.get(key)!=null){
+		if (channelMap.get(key) != null) {
 			channelMap.get(key).add(channel);
-		}else{
+		} else {
 			List<Channel> list = new ArrayList<>();
 			list.add(channel);
 			channelMap.putIfAbsent(key, list);
@@ -78,5 +81,15 @@ public class RpcClientBootstrapContext {
 
 	public CopyOnWriteArrayList<String> getFailureChannel() {
 		return failureChannel;
+	}
+
+	public void addPooledChannelHolder(PooledChannelHolder pooledChannelHolder) {
+		String key = hostAndPort(pooledChannelHolder.getHost(), pooledChannelHolder.getPort());
+		this.pooledChannelHolderMap.putIfAbsent(key, pooledChannelHolder);
+	}
+
+	public PooledChannelHolder getPooledChannelHolder(String host, int port) {
+		String key = hostAndPort(host, port);
+		return this.pooledChannelHolderMap.get(key);
 	}
 }

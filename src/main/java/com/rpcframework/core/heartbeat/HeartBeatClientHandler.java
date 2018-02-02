@@ -1,6 +1,7 @@
 package com.rpcframework.core.heartbeat;
 
 import com.rpcframework.core.RpcClientBootstrapContext;
+import com.rpcframework.core.pool.PooledChannelHolder;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -22,10 +23,17 @@ public class HeartBeatClientHandler extends ChannelInboundHandlerAdapter {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	private PooledChannelHolder pooledChannelHolder;
+
+	public HeartBeatClientHandler(PooledChannelHolder pooledChannelHolder) {
+		this.pooledChannelHolder = pooledChannelHolder;
+	}
+
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		logger.debug("客户端连接激活");
-		RpcClientBootstrapContext.getInstance().setChannel(ctx.channel());
+//		RpcClientBootstrapContext.getInstance().setChannel(ctx.channel());
+		pooledChannelHolder.channelActiveCallback(ctx.channel());
 		ctx.fireChannelActive();
 	}
 

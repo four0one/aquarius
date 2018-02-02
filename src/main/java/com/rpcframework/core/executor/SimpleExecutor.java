@@ -1,8 +1,7 @@
 package com.rpcframework.core.executor;
 
 import com.rpcframework.core.RpcRequest;
-import com.rpcframework.core.SnowflakeIdWorker;
-import io.netty.channel.Channel;
+import com.rpcframework.core.pool.PooledChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,7 @@ public class SimpleExecutor implements ClientExecutor {
 	@Override
 	public void execute(RpcRequest rpcRequest, ClientExecutorContext ctx) {
 		try {
-			Channel channel = ctx.getChannel();
+			PooledChannel channel = ctx.getChannel();
 			channel.writeAndFlush(rpcRequest);
 			logger.debug("request:{}", rpcRequest);
 		} catch (Exception e) {

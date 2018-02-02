@@ -3,9 +3,11 @@ package com.rpcframework.spring;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rpcframework.core.RpcClientBootstrap;
+import com.rpcframework.core.RpcClientBootstrapContext;
 import com.rpcframework.core.executor.ConsistencyHashRing;
 import com.rpcframework.core.executor.ConsistencyHashService;
 import com.rpcframework.core.handler.ServiceRegistMapContext;
+import com.rpcframework.core.pool.PooledChannelHolder;
 import com.rpcframework.monitor.ServiceModel;
 import com.rpcframework.utils.HttpUtils;
 import org.springframework.beans.factory.InitializingBean;
@@ -80,13 +82,11 @@ public class ClientMonitor implements InitializingBean {
 	}
 
 	private void openServiceChannel(Set<ServiceModel> serviceModelSet) {
-		RpcClientBootstrap clientBootstrap = null;
+		PooledChannelHolder holder = null;
 		for (ServiceModel model : serviceModelSet) {
-			//每个ip端口创建三个连接
-			for(int i=0;i<10;i++){
-				clientBootstrap = new RpcClientBootstrap(model.getHost(), model.getPort());
-				clientBootstrap.start();
-			}
+			holder = new PooledChannelHolder(model.getHost(), model.getPort());
+			holder.initChannel();
+			RpcClientBootstrapContext.getInstance().addPooledChannelHolder(holder);
 		}
 	}
 }
