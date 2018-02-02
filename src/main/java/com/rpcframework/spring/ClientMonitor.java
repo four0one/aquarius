@@ -82,8 +82,11 @@ public class ClientMonitor implements InitializingBean {
 	private void openServiceChannel(Set<ServiceModel> serviceModelSet) {
 		RpcClientBootstrap clientBootstrap = null;
 		for (ServiceModel model : serviceModelSet) {
-			clientBootstrap = new RpcClientBootstrap(model.getHost(), model.getPort());
-			clientBootstrap.start();
+			//每个ip端口创建三个连接
+			for(int i=0;i<10;i++){
+				clientBootstrap = new RpcClientBootstrap(model.getHost(), model.getPort());
+				clientBootstrap.start();
+			}
 		}
 	}
 }
