@@ -28,20 +28,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ClientTransceiver {
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-	private final int LOCK_SIZE = 16;
 	//锁分段
-	private final List<ReentrantLock> transceiverLocks = new ArrayList<>(LOCK_SIZE);
 	private final Map<String, Object> respMap = new ConcurrentHashMap();
-	private final Map<String, Condition> conditionMap = new ConcurrentHashMap();
+	private final Map<String, TransceiverLock> transceiverLocks = new ConcurrentHashMap();
 
 	private SnowflakeIdWorker idWorker = new SnowflakeIdWorker(0, 0);
 
 	public ClientTransceiver() {
-		for (int i = 0; i < LOCK_SIZE; i++) {
-			transceiverLocks.add(new ReentrantLock());
-		}
+
 	}
 
 	private static class ClientTransceiverHolder {
@@ -54,28 +48,26 @@ public class ClientTransceiver {
 
 	public RpcResponse sendRequest(RpcRequest rpcRequest) {
 		requestAddId(rpcRequest);
-		ReentrantLock transceiverLock = modAndGetLock(rpcRequest.getRequestId());
+		TransceiverLock transceiverLock = new TransceiverLock();
 		transceiverLock.lock();
-		Condition respArrive = transceiverLock.newCondition();
 		try {
 			ClientExecutor simpleExecutor = new SimpleExecutor();
 			ClientExecutor hashExecutor = new HashExecutor(simpleExecutor);
 			hashExecutor.execute(rpcRequest, new ClientExecutorContext());
 			respMap.put(rpcRequest.getRequestId(), NoneObject.NONE);
-			conditionMap.put(rpcRequest.getRequestId(), respArrive);
-			respArrive.await();
+			transceiverLocks.put(rpcRequest.getRequestId(), transceiverLock);
+			transceiverLock.await();
 			//接收到线程响应
 			Object rpcResponse = respMap.get(rpcRequest.getRequestId());
 			if (rpcResponse instanceof NoneObject) {
 				return null;
 			}
 			respMap.remove(rpcRequest.getRequestId());
-			conditionMap.remove(rpcRequest.getRequestId());
+			transceiverLocks.remove(rpcRequest.getRequestId());
 			return (RpcResponse) rpcResponse;
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			transceiverLock.unlock();
 		}
 		return null;
 
@@ -92,16 +84,15 @@ public class ClientTransceiver {
 			return;
 		}
 		RpcResponse rpcResponse = (RpcResponse) response;
-		ReentrantLock transceiverLock = modAndGetLock(rpcResponse.getRequestId());
-		transceiverLock.lock();
+		String requestId = rpcResponse.getRequestId();
+		TransceiverLock transceiverLock = transceiverLocks.get(requestId);
 		try {
-			String requestId = rpcResponse.getRequestId();
 			//存在这次请求则写入返回，否则忽略
 			if (respMap.containsKey(requestId)) {
 				respMap.put(requestId, rpcResponse);
 			}
-			Condition respArrive = conditionMap.get(requestId);
-			respArrive.signal();
+			transceiverLock.lock();
+			transceiverLock.signal();
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
@@ -109,10 +100,4 @@ public class ClientTransceiver {
 		}
 	}
 
-
-	private ReentrantLock modAndGetLock(String requestId){
-		int requestIdInt = Integer.parseInt(requestId.substring(13));
-		int i = requestIdInt % LOCK_SIZE;
-		return transceiverLocks.get(i);
-	}
 }

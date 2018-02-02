@@ -33,7 +33,7 @@ public class ClientRpcServiceProxy implements MethodInterceptor {
 
 	private ClientTransceiver clientTransceiver = ClientTransceiver.getInstance();
 
-	private ExecutorService requestCallThreadPool = Executors.newFixedThreadPool(16);
+	private ExecutorService requestCallThreadPool = Executors.newFixedThreadPool(64);
 
 	private static class ClientRpcServiceProxyHolder {
 		private static ClientRpcServiceProxy INSTANCE = new ClientRpcServiceProxy();
