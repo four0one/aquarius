@@ -49,13 +49,13 @@ public class ClientTransceiver {
 	public RpcResponse sendRequest(RpcRequest rpcRequest) {
 		requestAddId(rpcRequest);
 		TransceiverLock transceiverLock = new TransceiverLock();
+		respMap.put(rpcRequest.getRequestId(), NoneObject.NONE);
+		transceiverLocks.put(rpcRequest.getRequestId(), transceiverLock);
 		transceiverLock.lock();
 		try {
 			ClientExecutor simpleExecutor = new SimpleExecutor();
 			ClientExecutor hashExecutor = new HashExecutor(simpleExecutor);
 			hashExecutor.execute(rpcRequest, new ClientExecutorContext());
-			respMap.put(rpcRequest.getRequestId(), NoneObject.NONE);
-			transceiverLocks.put(rpcRequest.getRequestId(), transceiverLock);
 			transceiverLock.await();
 			//接收到线程响应
 			Object rpcResponse = respMap.get(rpcRequest.getRequestId());

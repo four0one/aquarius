@@ -63,7 +63,7 @@ public class RpcClientBootstrap {
 		}
 	}
 
-	public void start(PooledChannelHolder pooledChannelHolder) {
+	public Channel connect(PooledChannelHolder pooledChannelHolder) {
 		group = new NioEventLoopGroup();
 		try {
 			bootstrap = new Bootstrap();
@@ -76,10 +76,12 @@ public class RpcClientBootstrap {
 					logger.debug("{}:{}RPC客户端启动成功", pooledChannelHolder.getHost(), pooledChannelHolder.getPort());
 				}
 			});
+			return channelFuture.channel();
 		} catch (Exception e) {
 			e.printStackTrace();
 			group.shutdownGracefully();
 		}
+		return null;
 	}
 
 	public void restart(ReconnectProcessor processor) {

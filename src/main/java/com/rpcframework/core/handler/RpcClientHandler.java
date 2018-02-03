@@ -5,6 +5,7 @@ import com.rpcframework.core.RpcClientBootstrapContext;
 import com.rpcframework.core.RpcRequest;
 import com.rpcframework.core.RpcResponse;
 import com.rpcframework.core.heartbeat.Pong;
+import com.rpcframework.core.pool.PooledChannelHolder;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -23,6 +24,12 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 
 	private ClientTransceiver transceiver = ClientTransceiver.getInstance();
 
+    private PooledChannelHolder pooledChannelHolder;
+
+    public RpcClientHandler(PooledChannelHolder pooledChannelHolder){
+        this.pooledChannelHolder = pooledChannelHolder;
+    }
+
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		logger.debug(" 收到返回 : {}", msg);
@@ -34,6 +41,7 @@ public class RpcClientHandler extends ChannelInboundHandlerAdapter {
 		if(msg instanceof RpcResponse){
 			//交由收发器处理
 			transceiver.recvResponse(msg);
+			this.pooledChannelHolder.pushChannel(ctx.channel());
 		}
 	}
 

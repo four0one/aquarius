@@ -1,5 +1,7 @@
 package com.rpcframework.core.pool;
 
+import io.netty.channel.Channel;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Condition;
@@ -11,43 +13,36 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class PooledState {
 
-	private final List<PooledChannel> idelChannelList = new ArrayList<>();
-	private final List<PooledChannel> activeChannelList = new ArrayList<>();
+	private final List<Channel> idelChannelList = new ArrayList<>();
+	private final List<Channel> activeChannelList = new ArrayList<>();
 
 	private final ReentrantLock lock = new ReentrantLock();
-	private final Condition lockCondition = lock.newCondition();
 	private final Condition activeCondition = lock.newCondition();
 
 
-	public List<PooledChannel> getIdelChannelList() {
-		return idelChannelList;
-	}
 
-	public void addIdelChannel(PooledChannel pooledChannel) {
+	public void addIdelChannel(Channel pooledChannel) {
 		idelChannelList.add(pooledChannel);
 	}
 
-	public void removeIdelChannel(PooledChannel pooledChannel) {
+	public void removeIdelChannel(Channel pooledChannel) {
 		idelChannelList.remove(pooledChannel);
 	}
 
-	public List<PooledChannel> getActiveChannelList() {
-		return activeChannelList;
-	}
 
-	public void addActiveChannel(PooledChannel pooledChannel) {
+	public void addActiveChannel(Channel pooledChannel) {
 		activeChannelList.add(pooledChannel);
 	}
 
-	public void removeActiveChannel(PooledChannel pooledChannel) {
-		activeChannelList.add(pooledChannel);
+	public void removeActiveChannel(Channel pooledChannel) {
+		activeChannelList.remove(pooledChannel);
 	}
 
 	public boolean isIdelChannelListEmpty(){
 		return idelChannelList.isEmpty();
 	}
 
-	public PooledChannel getIdelChannel(){
+	public Channel getIdelChannel(){
 		return idelChannelList.remove(0);
 	}
 
@@ -65,14 +60,6 @@ public class PooledState {
 
 	public void unlock(){
 		this.lock.unlock();
-	}
-
-	public void await() throws InterruptedException {
-		this.lockCondition.await();
-	}
-
-	public void signal(){
-		this.lockCondition.signal();
 	}
 
 	public void waitIdle() throws InterruptedException {

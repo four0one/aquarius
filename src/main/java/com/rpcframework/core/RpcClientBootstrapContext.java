@@ -1,21 +1,16 @@
 package com.rpcframework.core;
 
 
-import com.rpcframework.core.pool.PooledChannel;
 import com.rpcframework.core.pool.PooledChannelHolder;
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.ScheduledFuture;
-import org.apache.commons.lang3.RandomUtils;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author wei.chen1
@@ -47,7 +42,7 @@ public class RpcClientBootstrapContext {
 		return ContextHolder.INSTANCE;
 	}
 
-	public PooledChannel getChannel(String host, int port) {
+	public Channel getChannel(String host, int port) {
 		PooledChannelHolder holder = pooledChannelHolderMap.get(hostAndPort(host, port));
 		return holder.popChannel();
 	}

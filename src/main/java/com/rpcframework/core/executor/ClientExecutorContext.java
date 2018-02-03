@@ -1,6 +1,5 @@
 package com.rpcframework.core.executor;
 
-import com.rpcframework.core.pool.PooledChannel;
 import com.rpcframework.monitor.ServiceModel;
 import io.netty.channel.Channel;
 
@@ -10,7 +9,7 @@ import io.netty.channel.Channel;
  */
 public class ClientExecutorContext {
 
-	private PooledChannel channel;
+	private Channel channel;
 
 	//当前正在使用的服务地址
 	private ServiceModel serviceModel;
@@ -23,11 +22,11 @@ public class ClientExecutorContext {
 		this.serviceModel = serviceModel;
 	}
 
-	public PooledChannel getChannel() {
+	public Channel getChannel() {
 		return channel;
 	}
 
-	public void setChannel(PooledChannel channel) {
+	public void setChannel(Channel channel) {
 		this.channel = channel;
 	}
 }

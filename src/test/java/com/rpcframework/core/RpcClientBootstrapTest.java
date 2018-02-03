@@ -16,19 +16,31 @@ import static org.junit.Assert.*;
 
 public class RpcClientBootstrapTest {
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
+        ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
+        ClientController bean = context.getBean(ClientController.class);
+        ClientRunnable clientRunnable = new ClientRunnable(bean);
+        long startTime = System.currentTimeMillis();
+        System.out.println("开始时间" + startTime);
+        Thread t;
+        for (int i = 0; i < 1000; i++) {
+            t = new Thread(clientRunnable);
+            t.start();
+        }
+        try {
+            bean.getRunThreads().await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("共用时间：" + (endTime - startTime));
+
+
 		/*ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
 		ClientController bean = context.getBean(ClientController.class);
-		ClientRunnable clientRunnable = new ClientRunnable(bean);
-		Thread t;
-		for (int i = 0; i < 1; i++) {
-			t = new Thread(clientRunnable);
-			t.start();
-		}*/
-		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
-		ClientController bean = context.getBean(ClientController.class);
-		bean.say();
-	}
+		bean.say();*/
+    }
 
 
 }

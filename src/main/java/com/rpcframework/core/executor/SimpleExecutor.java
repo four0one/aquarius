@@ -1,7 +1,7 @@
 package com.rpcframework.core.executor;
 
 import com.rpcframework.core.RpcRequest;
-import com.rpcframework.core.pool.PooledChannel;
+import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class SimpleExecutor implements ClientExecutor {
 	@Override
 	public void execute(RpcRequest rpcRequest, ClientExecutorContext ctx) {
 		try {
-			PooledChannel channel = ctx.getChannel();
+			Channel channel = ctx.getChannel();
 			channel.writeAndFlush(rpcRequest);
 			logger.debug("request:{}", rpcRequest);
 		} catch (Exception e) {
