@@ -4,6 +4,7 @@ import io.netty.channel.Channel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -19,6 +20,7 @@ public class PooledState {
 	private final ReentrantLock lock = new ReentrantLock();
 	private final Condition activeCondition = lock.newCondition();
 
+	private final AtomicLong reqCounts = new AtomicLong(0);
 
 
 	public void addIdelChannel(Channel pooledChannel) {
@@ -44,6 +46,10 @@ public class PooledState {
 
 	public Channel getIdelChannel(){
 		return idelChannelList.remove(0);
+	}
+
+	public Channel getIdelChannel(int i){
+		return idelChannelList.get(i);
 	}
 
 	public int activeChannelSize(){
@@ -74,4 +80,10 @@ public class PooledState {
 		this.idelChannelList.removeAll(idelChannelList);
 		this.activeChannelList.removeAll(activeChannelList);
 	}
+
+	public AtomicLong getReqCounts() {
+		return reqCounts;
+	}
+
+
 }

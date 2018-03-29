@@ -19,7 +19,7 @@ public class ClientController {
 	@RpcResource
 	private DemoService demoService;
 
-	private CountDownLatch runThreads = new CountDownLatch(1000);
+	private CountDownLatch runThreads = new CountDownLatch(20000);
 
 	public void say(){
 		String msg = demoService.hello();

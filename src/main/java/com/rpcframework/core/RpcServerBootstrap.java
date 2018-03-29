@@ -5,6 +5,7 @@ import com.rpcframework.core.codec.MessageEncoder;
 import com.rpcframework.core.handler.RpcServerHandler;
 import com.rpcframework.core.heartbeat.HeartBeatServerHandler;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -29,7 +30,7 @@ public class RpcServerBootstrap {
 
 	private EventLoopGroup boss = new NioEventLoopGroup();
 	//自定义工作线程组，线程数为核心数的2倍，使用自定义前缀的线程工厂
-	private EventLoopGroup worker = new NioEventLoopGroup(8);
+	private EventLoopGroup worker = new NioEventLoopGroup(4);
 
 	public void start(int port) {
 		port = port == 0 ? 8088 : port;
@@ -48,6 +49,7 @@ public class RpcServerBootstrap {
 						pipeline.addLast("pongHandler", new HeartBeatServerHandler());
 					}
 				}).option(ChannelOption.SO_BACKLOG, 128)
+				.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.childOption(ChannelOption.SO_KEEPALIVE, true);
 		try {
 			ChannelFuture channelFuture = bootstrap.bind();

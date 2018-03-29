@@ -23,7 +23,7 @@ public class RpcClientBootstrapTest {
         long startTime = System.currentTimeMillis();
         System.out.println("开始时间" + startTime);
         Thread t;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 20000; i++) {
             t = new Thread(clientRunnable);
             t.start();
         }
