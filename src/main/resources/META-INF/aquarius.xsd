@@ -6,7 +6,7 @@
     <xsd:element name="registry">
         <xsd:complexType>
             <xsd:attribute name="id" type="xsd:string" />
-            <xsd:attribute name="address" type="xsd:string" default=""/>
+            <xsd:attribute name="address" type="xsd:string" default="127.0.0.1"/>
             <xsd:attribute name="port" type="xsd:int" />
         </xsd:complexType>
     </xsd:element>
@@ -20,8 +20,9 @@
     <xsd:element name="monitor">
         <xsd:complexType>
             <xsd:attribute name="id" type="xsd:string" />
-            <xsd:attribute name="address" type="xsd:string" />
+            <xsd:attribute name="config" type="xsd:string" default="zk.properties"/><!--配置文件地址-->
             <xsd:attribute name="flushInterval" type="xsd:long" default="0"/>
+            <xsd:attribute name="strategy" type="xsd:string" default="zk"/><!--注册服务策略 zk redis http-->
         </xsd:complexType>
     </xsd:element>
 </xsd:schema>

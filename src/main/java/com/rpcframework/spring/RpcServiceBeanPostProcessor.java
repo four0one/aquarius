@@ -5,6 +5,8 @@ import com.rpcframework.core.handler.RpcServiceContext;
 import com.rpcframework.exception.RpcServiceBeansException;
 import com.rpcframework.filter.Filter;
 import com.rpcframework.monitor.ServiceModel;
+import com.rpcframework.register.ServiceRegister;
+import com.rpcframework.register.ServiceRegisterFactory;
 import com.rpcframework.utils.AopTargetUtils;
 import com.rpcframework.utils.HttpUtils;
 import com.rpcframework.utils.ServiceSignUtils;
@@ -31,10 +33,14 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 
 	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
+	private ServiceRegister serviceRegister;
+
 	@Override
 	protected void initApplicationContext(ApplicationContext context) throws BeansException {
 		RpcRegistry registry = context.getBean(RpcRegistry.class);
 		Monitor monitor = context.getBean(Monitor.class);
+		serviceRegister = ServiceRegisterFactory.getServiceRegister(monitor);
+
 		int port = registry.getPort();
 		String host = null;
 		try {
@@ -78,20 +84,20 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 					serviceName = ServiceSignUtils.sign(inf.getName(), method.getName());
 					RpcServiceContext.addRpcMapping(serviceName, proxy);
 					//向monitor注册服务信息
-					registServiceToMonitor(serviceName, host, port, monitor.getAddress());
+					registServiceToMonitor(serviceName, host, port);
 				}
 			}
 		}
 
 	}
 
-	private void registServiceToMonitor(String serviceName, String host, int port, String monitorAddress) {
-		HttpUtils httpUtils = HttpUtils.getInstance();
+	private void registServiceToMonitor(String serviceName, String host, int port) {
 		ServiceModel serviceModel = new ServiceModel();
 		serviceModel.setServiceName(serviceName);
 		serviceModel.setHost(host);
 		serviceModel.setPort(port);
-		httpUtils.postJson(serviceModel, monitorAddress + "/services/regist");
+		serviceModel.setAddress(host + ":" + port);
+		serviceRegister.regist(serviceModel);
 	}
 
 	private Object createServiceProxy(Object bean, Filter filter) {

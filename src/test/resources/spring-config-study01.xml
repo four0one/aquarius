@@ -9,5 +9,5 @@
     <context:component-scan base-package="com.rpcframework.service"/>
     <aquarius:server id="server"/>
     <aquarius:registry id="registry" port="8089"/>
-    <aquarius:monitor id="monitor" address="127.0.0.1"/>
+    <aquarius:monitor id="monitor" config="config/sv_zk.properties"/>
 </beans>

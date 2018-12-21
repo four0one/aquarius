@@ -19,7 +19,8 @@ public class MonitorParser implements BeanDefinitionParser {
 		beanDefinition.setBeanClass(Monitor.class);
 		beanDefinition.setLazyInit(false);
 
-		beanDefinition.getPropertyValues().addPropertyValue("address", element.getAttribute("address"));
+		beanDefinition.getPropertyValues().addPropertyValue("config", element.getAttribute("config"));
+		beanDefinition.getPropertyValues().addPropertyValue("strategy", element.getAttribute("strategy"));
 		beanDefinition.getPropertyValues().addPropertyValue("flushInterval", element.getAttribute("flushInterval"));
 		parserContext.getRegistry().registerBeanDefinition(Monitor.class.getName(),
 				beanDefinition);

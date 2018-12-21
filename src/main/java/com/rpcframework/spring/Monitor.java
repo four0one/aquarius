@@ -7,16 +7,18 @@ package com.rpcframework.spring;
  */
 public class Monitor {
 
-	private String address;
+	private String config;
+
+	private String strategy;
 
 	private long flushInterval;
 
-	public String getAddress() {
-		return address;
+	public String getConfig() {
+		return config;
 	}
 
-	public void setAddress(String address) {
-		this.address = address;
+	public void setConfig(String config) {
+		this.config = config;
 	}
 
 	public long getFlushInterval() {
@@ -25,5 +27,13 @@ public class Monitor {
 
 	public void setFlushInterval(long flushInterval) {
 		this.flushInterval = flushInterval;
+	}
+
+	public String getStrategy() {
+		return strategy;
+	}
+
+	public void setStrategy(String strategy) {
+		this.strategy = strategy;
 	}
 }
