@@ -69,7 +69,7 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 			if (!filterClass.isAssignableFrom(Filter.NONE.class)) {
 				filter = (Filter) context.getBean(filterClass);
 			}
-			//在这里生成并且put bean代理
+			//在这里生成并且put bean代理,后期可添加一些拦截器
 			Object proxy = createServiceProxy(bean, filter);
 			logger.debug("注册rpc方法");
 			Class<?>[] interfaces = bean.getClass().getInterfaces();
@@ -79,12 +79,17 @@ public class RpcServiceBeanPostProcessor extends ApplicationObjectSupport {
 					continue;
 				}
 				Method[] allDeclaredMethods = ReflectionUtils.getAllDeclaredMethods(inf);
-				for (Method method : allDeclaredMethods) {
-					logger.debug("interfaceName:{} methodName:{}", inf.getName(), method.getName());
-					serviceName = ServiceSignUtils.sign(inf.getName(), method.getName());
-					RpcServiceContext.addRpcMapping(serviceName, proxy);
-					//向monitor注册服务信息
-					registServiceToMonitor(serviceName, host, port);
+				if (null != allDeclaredMethods && allDeclaredMethods.length != 0) {
+					//获取分布式锁，防止出现多个服务提供者同时注册
+					serviceRegister.acquireLock(inf.getName());
+					for (Method method : allDeclaredMethods) {
+						logger.debug("interfaceName:{} methodName:{}", inf.getName(), method.getName());
+						serviceName = ServiceSignUtils.sign(inf.getName(), method.getName());
+						RpcServiceContext.addRpcMapping(serviceName, proxy);
+						//注册服务信息
+						registServiceToMonitor(serviceName, host, port);
+					}
+					serviceRegister.releaseLock(inf.getName());
 				}
 			}
 		}
