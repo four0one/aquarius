@@ -1,4 +1,4 @@
-package com.rpcframework.register.zookeeper;
+package com.rpcframework.zookeeper;
 
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;

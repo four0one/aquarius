@@ -1,4 +1,4 @@
-package com.rpcframework.register.zookeeper;
+package com.rpcframework.zookeeper;
 
 import org.apache.zookeeper.*;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class ZookProcesser implements Watcher {
 	public void process(WatchedEvent watchedEvent) {
 		if (Event.KeeperState.SyncConnected.equals(watchedEvent.getState())) {
 			logger.info("zk connected!");
-			status = 1;
+			status = Event.KeeperState.SyncConnected.getIntValue();
 		} else {
 			logger.info("zk not ready!");
 		}
@@ -68,6 +68,9 @@ public class ZookProcesser implements Watcher {
 					}
 				}, data);
 	}
+
+
+
 
 	public void close() {
 		try {

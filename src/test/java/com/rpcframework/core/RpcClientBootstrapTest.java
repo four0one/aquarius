@@ -19,11 +19,12 @@ public class RpcClientBootstrapTest {
     public static void main(String[] args) {
         ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
         ClientController bean = context.getBean(ClientController.class);
+        int ts = 9000;
+        bean.setRunThreads(ts);
         ClientRunnable clientRunnable = new ClientRunnable(bean);
         long startTime = System.currentTimeMillis();
-        System.out.println("开始时间" + startTime);
         Thread t;
-        for (int i = 0; i < 20000; i++) {
+        for (int i = 0; i < ts; i++) {
             t = new Thread(clientRunnable);
             t.start();
         }
@@ -34,7 +35,7 @@ public class RpcClientBootstrapTest {
         }
         long endTime = System.currentTimeMillis();
 
-        System.out.println("共用时间：" + (endTime - startTime));
+        System.out.println("共用时间：" + (endTime - startTime)/1000);
 
 
 		/*ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");

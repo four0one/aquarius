@@ -1,6 +1,5 @@
 package com.rpcframework.spring;
 
-import com.rpcframework.core.RpcClientBootstrap;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.BeanDefinitionParser;
@@ -18,6 +17,7 @@ public class RpcClientParser implements BeanDefinitionParser {
 		RootBeanDefinition beanDefinition = new RootBeanDefinition();
 		beanDefinition.setBeanClass(ClientRpcServiceProxyProcessor.class);
 		beanDefinition.setLazyInit(false);
+		beanDefinition.getPropertyValues().addPropertyValue("config", element.getAttribute("config"));
 		parserContext.getRegistry().registerBeanDefinition(ClientRpcServiceProxyProcessor.class.getName(),
 				beanDefinition);
 		return beanDefinition;

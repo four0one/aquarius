@@ -19,13 +19,11 @@ public class ClientController {
 	@RpcResource
 	private DemoService demoService;
 
-	private CountDownLatch runThreads = new CountDownLatch(20000);
+	private CountDownLatch runThreads;
 
 	public void say(){
 		String msg = demoService.hello();
-		System.out.println(msg);
 		Person person = demoService.findPerson("陈伟");
-		System.out.println(person.getAddress());
         runThreads.countDown();
 
 	}
@@ -33,4 +31,8 @@ public class ClientController {
     public CountDownLatch getRunThreads() {
         return runThreads;
     }
+
+	public void setRunThreads(int ts) {
+		runThreads = new CountDownLatch(ts);
+	}
 }

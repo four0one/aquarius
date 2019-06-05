@@ -9,4 +9,6 @@ import com.rpcframework.monitor.ServiceModel;
 public interface ServiceRegister {
 
 	void regist(ServiceModel serviceModel);
+	void acquireLock(String interfaceName);
+	void releaseLock(String interfaceName);
 }

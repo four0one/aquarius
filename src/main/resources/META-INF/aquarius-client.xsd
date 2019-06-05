@@ -8,14 +8,7 @@
     <xsd:element name="client">
         <xsd:complexType>
             <xsd:attribute name="id" type="xsd:string" default="rpc-client"/>
-        </xsd:complexType>
-    </xsd:element>
-    <!--定义监控地址获取服务信息-->
-    <xsd:element name="monitor">
-        <xsd:complexType>
-            <xsd:attribute name="id" type="xsd:string" default="rpc-monitor"/>
-            <xsd:attribute name="address" type="xsd:string"/>
-            <xsd:attribute name="flushInterval" type="xsd:long" default="0"/>
+            <xsd:attribute name="config" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 

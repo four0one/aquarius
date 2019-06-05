@@ -20,8 +20,8 @@ public class RpcClientBootstrapContext {
 
 	private Map<String, RpcClientBootstrap> bootstrapMap = new HashMap<>();
 
-	private Map<String, List<Channel>> channelMap = new ConcurrentHashMap<>();
-	private Map<String, PooledChannelHolder> pooledChannelHolderMap = new ConcurrentHashMap<>();
+	private Map<String, List<Channel>> channelMap = new HashMap<>();
+	private Map<String, PooledChannelHolder> pooledChannelHolderMap = new HashMap<>();
 
 	private CopyOnWriteArrayList failureChannel = new CopyOnWriteArrayList();
 
