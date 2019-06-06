@@ -8,32 +8,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ServiceRegistMapContext {
 
 	/**
 	 * 客户端本地服务注册表
 	 */
-	private static final Map<String, List<ServiceModel>> rpcServiceMapping = new ConcurrentHashMap<>();
 	private static final Map<String, ConsistencyHashRing> rpcServiceHashRingMapping = new ConcurrentHashMap<>();
 
-	public static ServiceModel getServiceModel(String serviceName) {
-		return rpcServiceMapping.get(serviceName).get(0);
-	}
-
-	public static void addServiceModel(String serviceName, CopyOnWriteArrayList list) {
-		rpcServiceMapping.put(serviceName, list);
-	}
+	private static final ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 
 	public static void addRpcServiceHashRing(String serviceName, ConsistencyHashRing ring) {
+		rwlock.writeLock().lock();
 		rpcServiceHashRingMapping.put(serviceName, ring);
+		rwlock.writeLock().unlock();
 	}
 
-	public static List<ServiceModel> getServiceModels(String serviceName) {
-		return rpcServiceMapping.get(serviceName);
-	}
 	public static ConsistencyHashRing getServiceHashRing(String serviceName) {
-		return rpcServiceHashRingMapping.get(serviceName);
+		try {
+			rwlock.readLock().lock();
+			return rpcServiceHashRingMapping.get(serviceName);
+		} finally {
+			rwlock.readLock().unlock();
+		}
 	}
 
 }

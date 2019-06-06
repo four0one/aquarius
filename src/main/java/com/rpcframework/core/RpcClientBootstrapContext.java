@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author wei.chen1
@@ -20,10 +21,9 @@ public class RpcClientBootstrapContext {
 
 	private Map<String, RpcClientBootstrap> bootstrapMap = new HashMap<>();
 
-	private Map<String, List<Channel>> channelMap = new HashMap<>();
 	private Map<String, PooledChannelHolder> pooledChannelHolderMap = new HashMap<>();
 
-	private CopyOnWriteArrayList failureChannel = new CopyOnWriteArrayList();
+	private final ReentrantReadWriteLock rwlock = new ReentrantReadWriteLock();
 
 	public void addBootstrap(String host, int port, RpcClientBootstrap rpcClientBootstrap) {
 		bootstrapMap.put(hostAndPort(host, port), rpcClientBootstrap);
@@ -32,11 +32,6 @@ public class RpcClientBootstrapContext {
 	private static class ContextHolder {
 		private static RpcClientBootstrapContext INSTANCE = new RpcClientBootstrapContext();
 	}
-
-	public RpcClientBootstrap getBootstrap(String host, int port) {
-		return bootstrapMap.get(hostAndPort(host, port));
-	}
-
 
 	public static RpcClientBootstrapContext getInstance() {
 		return ContextHolder.INSTANCE;
@@ -47,22 +42,6 @@ public class RpcClientBootstrapContext {
 		return holder.popChannel();
 	}
 
-	public void removeChannel(String host, int port) {
-		channelMap.remove(hostAndPort(host, port));
-	}
-
-	public void setChannel(Channel channel) {
-		InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
-		String key = hostAndPort(socketAddress.getHostString(), socketAddress.getPort());
-		if (channelMap.get(key) != null) {
-			channelMap.get(key).add(channel);
-		} else {
-			List<Channel> list = new ArrayList<>();
-			list.add(channel);
-			channelMap.putIfAbsent(key, list);
-		}
-	}
-
 	private String hostAndPort(String host, int port) {
 		StringBuffer hostAndPort = new StringBuffer(host);
 		hostAndPort.append(":");
@@ -70,21 +49,25 @@ public class RpcClientBootstrapContext {
 		return hostAndPort.toString();
 	}
 
-	public void addFailureChannel(String host, int port) {
-		failureChannel.add(hostAndPort(host, port));
-	}
-
-	public CopyOnWriteArrayList<String> getFailureChannel() {
-		return failureChannel;
-	}
-
 	public void addPooledChannelHolder(PooledChannelHolder pooledChannelHolder) {
+		rwlock.writeLock().lock();
 		String key = hostAndPort(pooledChannelHolder.getHost(), pooledChannelHolder.getPort());
 		this.pooledChannelHolderMap.putIfAbsent(key, pooledChannelHolder);
+		rwlock.writeLock().unlock();
 	}
 
 	public PooledChannelHolder getPooledChannelHolder(String host, int port) {
+		try {
+			rwlock.readLock().lock();
+			String key = hostAndPort(host, port);
+			return this.pooledChannelHolderMap.get(key);
+		} finally {
+			rwlock.readLock().unlock();
+		}
+	}
+
+	public void removePooledChannelHolder(String host,int port) {
 		String key = hostAndPort(host, port);
-		return this.pooledChannelHolderMap.get(key);
+		this.pooledChannelHolderMap.remove(key);
 	}
 }

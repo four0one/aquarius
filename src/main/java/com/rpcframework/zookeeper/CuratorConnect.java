@@ -162,7 +162,7 @@ public class CuratorConnect {
 		}
 	}
 
-	public void listenChildrenChange(String path) {
+	public void listenChildrenChange(String path,PathChildrenCacheListener listener) {
 		// 为子节点添加watcher
 		// PathChildrenCache: 监听数据节点的增删改，可以设置触发的事件
 		PathChildrenCache childrenCache = new PathChildrenCache(client, path, true);
@@ -177,33 +177,8 @@ public class CuratorConnect {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// 列出子节点数据列表，需要使用BUILD_INITIAL_CACHE同步初始化模式才能获得，异步是获取不到的
-		List<ChildData> childDataList = childrenCache.getCurrentData();
-		System.out.println("当前节点的子节点详细数据列表：");
-		for (ChildData childData : childDataList) {
-			logger.debug("\t* 子节点路径：" + new String(childData.getPath()) + "，该节点的数据为：" + new String(childData.getData()));
-		}
 		// 添加事件监听器
-		childrenCache.getListenable().addListener(new PathChildrenCacheListener() {
-			public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent event) throws Exception {
-				// 通过判断event type的方式来实现不同事件的触发
-				if (event.getType().equals(PathChildrenCacheEvent.Type.INITIALIZED)) {  // 子节点初始化时触发
-					System.out.println("\n--------------\n");
-					System.out.println("子节点初始化成功");
-				} else if (event.getType().equals(PathChildrenCacheEvent.Type.CHILD_ADDED)) {  // 添加子节点时触发
-					System.out.println("\n--------------\n");
-					System.out.print("子节点：" + event.getData().getPath() + " 添加成功，");
-					System.out.println("该子节点的数据为：" + new String(event.getData().getData()));
-				} else if (event.getType().equals(PathChildrenCacheEvent.Type.CHILD_REMOVED)) {  // 删除子节点时触发
-					System.out.println("\n--------------\n");
-					System.out.println("子节点：" + event.getData().getPath() + " 删除成功");
-				} else if (event.getType().equals(PathChildrenCacheEvent.Type.CHILD_UPDATED)) {  // 修改子节点数据时触发
-					System.out.println("\n--------------\n");
-					System.out.print("子节点：" + event.getData().getPath() + " 数据更新成功，");
-					System.out.println("子节点：" + event.getData().getPath() + " 新的数据为：" + new String(event.getData().getData()));
-				}
-			}
-		});
+		childrenCache.getListenable().addListener(listener);
 	}
 
 	// 关闭zk客户端连接

@@ -10,6 +10,9 @@ import com.rpcframework.discoverer.ServiceDiscoverer;
 import com.rpcframework.discoverer.ServiceDiscovererImpl;
 import com.rpcframework.exception.RpcRequestException;
 import com.rpcframework.monitor.ServiceModel;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
+import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -26,12 +29,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author wei.chen1
  * @since 2018/1/16
  */
-public class ClientRpcServiceProxyProcessor implements BeanPostProcessor,InitializingBean {
+public class ClientRpcServiceProxyProcessor implements BeanPostProcessor, InitializingBean, PathChildrenCacheListener {
 
 	private String config;
 
 	private ServiceDiscoverer serviceDiscoverer;
-
 
 	@Override
 	public Object postProcessBeforeInitialization(Object o, String s) throws BeansException {
@@ -73,10 +75,10 @@ public class ClientRpcServiceProxyProcessor implements BeanPostProcessor,Initial
 				serviceModelSet.add(model);
 				copyList.add(model);
 			}
-			ServiceRegistMapContext.addServiceModel(key, copyList);
 			ConsistencyHashService hashService = new ConsistencyHashService();
 			ConsistencyHashRing hashRing = hashService.generateHashRing(serviceModels);
 			ServiceRegistMapContext.addRpcServiceHashRing(key, hashRing);
+			serviceDiscoverer.listenService(key, this);
 		}
 
 		//打开channel
@@ -90,6 +92,28 @@ public class ClientRpcServiceProxyProcessor implements BeanPostProcessor,Initial
 			holder = new PooledChannelHolder(model.getHost(), model.getPort());
 			holder.initChannel();
 			RpcClientBootstrapContext.getInstance().addPooledChannelHolder(holder);
+		}
+	}
+
+	@Override
+	public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent event) throws Exception {
+		String path = event.getData().getPath();
+		if (event.getType().equals(PathChildrenCacheEvent.Type.CHILD_ADDED)) {  // 添加子节点时触发
+			String serviceName = path.substring(0, path.lastIndexOf("/"));
+			ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceDiscoverer.generateServiceRing(serviceName));
+			String address = new String(event.getData().getData());
+			String[] hostAndPort = address.split(":");
+			PooledChannelHolder holder = new PooledChannelHolder(hostAndPort[0],Integer.parseInt(hostAndPort[1]));
+			holder.initChannel();
+			RpcClientBootstrapContext.getInstance().addPooledChannelHolder(holder);
+		}
+
+		if(event.getType().equals(PathChildrenCacheEvent.Type.CHILD_REMOVED)){
+			String serviceName = path.substring(0, path.lastIndexOf("/"));
+			ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceDiscoverer.generateServiceRing(serviceName));
+			String address = new String(event.getData().getData());
+			String[] hostAndPort = address.split(":");
+			RpcClientBootstrapContext.getInstance().removePooledChannelHolder(hostAndPort[0],Integer.parseInt(hostAndPort[1]));
 		}
 	}
 

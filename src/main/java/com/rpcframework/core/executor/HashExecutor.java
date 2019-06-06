@@ -42,16 +42,10 @@ public class HashExecutor implements ClientExecutor {
 	private Channel requestHashChannel(RpcRequest rpcRequest, String serviceName) {
 		Channel channel = null;
 		ConsistencyHashRing serviceHashRing = ServiceRegistMapContext.getServiceHashRing(serviceName);
-		do {
+		if(serviceHashRing.getVirtualNodes().size() != 0){
 			ServiceModel serviceModel = hashService.getServer(rpcRequest.toString(), serviceHashRing);
 			channel = RpcClientBootstrapContext.getInstance().getChannel(serviceModel.getHost(), serviceModel.getPort());
-			if (null == channel) {
-				List<ServiceModel> serviceModels = ServiceRegistMapContext.getServiceModels(serviceName);
-				serviceModels.remove(serviceModel);
-				serviceHashRing = hashService.generateHashRing(serviceModels);
-				ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceHashRing);
-			}
-		} while (channel == null && serviceHashRing.getVirtualNodes().size() != 0);
+		}
 		return channel;
 	}
 
