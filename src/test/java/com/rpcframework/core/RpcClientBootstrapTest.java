@@ -18,24 +18,24 @@ public class RpcClientBootstrapTest {
 
     public static void main(String[] args) {
         ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
-//        ClientController bean = context.getBean(ClientController.class);
-//        int ts = 2;
-//        bean.setRunThreads(ts);
-//        ClientRunnable clientRunnable = new ClientRunnable(bean);
-//        long startTime = System.currentTimeMillis();
-//        Thread t;
-//        for (int i = 0; i < ts; i++) {
-//            t = new Thread(clientRunnable);
-//            t.start();
-//        }
-//        try {
-//            bean.getRunThreads().await();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//        long endTime = System.currentTimeMillis();
-//
-//        System.out.println("共用时间：" + (endTime - startTime)/1000);
+        ClientController bean = context.getBean(ClientController.class);
+        int ts = 2;
+        bean.setRunThreads(ts);
+        ClientRunnable clientRunnable = new ClientRunnable(bean);
+        long startTime = System.currentTimeMillis();
+        Thread t;
+        for (int i = 0; i < ts; i++) {
+            t = new Thread(clientRunnable);
+            t.start();
+        }
+        try {
+            bean.getRunThreads().await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("共用时间：" + (endTime - startTime)/1000);
 
 
 		/*ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
