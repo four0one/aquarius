@@ -61,7 +61,7 @@ public class ClientRpcServiceProxyProcessor implements BeanPostProcessor, Initia
 		serviceDiscoverer = new ServiceDiscovererImpl(config);
 		Map<String, List<ServiceModel>> serviceMap = serviceDiscoverer.find();
 		if (null == serviceMap || serviceMap.isEmpty()) {
-			throw new Exception("客户端同步服务注册表信息为空");
+			return;
 		}
 
 		//去重服务器地址
@@ -99,22 +99,12 @@ public class ClientRpcServiceProxyProcessor implements BeanPostProcessor, Initia
 	public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent event) throws Exception {
 		if (event.getType().equals(PathChildrenCacheEvent.Type.CHILD_ADDED)) {  // 添加子节点时触发
 			String path = event.getData().getPath();
-			String serviceName = path.substring(1, path.lastIndexOf("/"));
-			ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceDiscoverer.generateServiceRing(serviceName));
-			String address = new String(event.getData().getData());
-			String[] hostAndPort = address.split(":");
-			PooledChannelHolder holder = new PooledChannelHolder(hostAndPort[0],Integer.parseInt(hostAndPort[1]));
-			holder.initChannel();
-			RpcClientBootstrapContext.getInstance().addPooledChannelHolder(holder);
+			System.out.println(event.getType()+path);
 		}
 
 		if(event.getType().equals(PathChildrenCacheEvent.Type.CHILD_REMOVED)){
 			String path = event.getData().getPath();
-			String serviceName = path.substring(1, path.lastIndexOf("/"));
-			ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceDiscoverer.generateServiceRing(serviceName));
-			String address = new String(event.getData().getData());
-			String[] hostAndPort = address.split(":");
-			RpcClientBootstrapContext.getInstance().removePooledChannelHolder(hostAndPort[0],Integer.parseInt(hostAndPort[1]));
+			System.out.println(event.getType()+path);
 		}
 	}
 

@@ -18,6 +18,7 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.DigestUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +42,8 @@ public class CuratorConnect {
 	private String workspace;
 
 	private Map<String, InterProcessMutex> lockMap = new HashMap<>();
+
+	private final String slat = "&%5123***&&%%$$#@";
 
 	public CuratorConnect(String zkServer, String workspace) {
 		this.zkServer = zkServer;
@@ -77,7 +80,7 @@ public class CuratorConnect {
 		client = CuratorFrameworkFactory.builder() // 使用工厂类来建造客户端的实例对象
 				.connectString(zkServer)  // 放入zookeeper服务器ip
 				.sessionTimeoutMs(10000).retryPolicy(retryPolicy)  // 设定会话时间以及重连策略
-				.namespace(workspace).namespace("lock")
+				.namespace(workspace)
 				.build();  // 建立连接通道
 		// 启动Curator客户端
 		client.start();
@@ -163,7 +166,6 @@ public class CuratorConnect {
 	}
 
 	public void listenChildrenChange(String path,PathChildrenCacheListener listener) {
-		client.usingNamespace(workspace);
 		// 为子节点添加watcher
 		// PathChildrenCache: 监听数据节点的增删改，可以设置触发的事件
 		PathChildrenCache childrenCache = new PathChildrenCache(client, path, true);
@@ -190,18 +192,18 @@ public class CuratorConnect {
 	}
 
 	public void acquireLock(String lockName) throws Exception {
-		client.usingNamespace("lock");
-		InterProcessMutex lock = new InterProcessMutex(client, "/" + lockName);
+		String base = lockName +"/"+slat;
+		String md5 = DigestUtils.md5DigestAsHex(base.getBytes());
+		InterProcessMutex lock = new InterProcessMutex(client, "/lock/" + md5);
 		lock.acquire();
-		lockMap.put(lockName, lock);
-		client.usingNamespace(workspace);
+		lockMap.put(md5, lock);
 	}
 
 	public void releaseLock(String lockName) throws Exception {
-		client.usingNamespace("lock");
-		InterProcessMutex lock = lockMap.get(lockName);
+		String base = lockName +"/"+slat;
+		String md5 = DigestUtils.md5DigestAsHex(base.getBytes());
+		InterProcessMutex lock = lockMap.get(md5);
 		lock.release();
-		client.usingNamespace(workspace);
 	}
 
 }
