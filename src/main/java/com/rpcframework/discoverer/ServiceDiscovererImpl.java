@@ -33,7 +33,7 @@ public class ServiceDiscovererImpl implements ServiceDiscoverer {
 		List<String> serviceList = curatorConnect.getNodeChildren("/");
 		if (!CollectionUtils.isEmpty(serviceList)) {
 			for (String serviceName : serviceList) {
-				//�ų�lockĿ¼
+				//排除lock目录
 				if(serviceName.equals("lock")){
 					continue;
 				}
