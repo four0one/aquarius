@@ -19,7 +19,7 @@ public class RpcClientBootstrapTest {
     public static void main(String[] args) {
         ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-client.xml");
         ClientController bean = context.getBean(ClientController.class);
-        int ts = 2;
+        int ts = 3;
         bean.setRunThreads(ts);
         ClientRunnable clientRunnable = new ClientRunnable(bean);
         long startTime = System.currentTimeMillis();

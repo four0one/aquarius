@@ -6,7 +6,7 @@ import com.rpcframework.annotation.RpcService;
  * @author wei.chen1
  * @since 2018/1/15
  */
-@RpcService
+@RpcService(filter = SimpleFilter.class)
 public class DemoServiceImpl implements DemoService{
 
 
@@ -24,4 +24,5 @@ public class DemoServiceImpl implements DemoService{
 		person.addAddress("上海 上海");
 		return person;
 	}
+
 }

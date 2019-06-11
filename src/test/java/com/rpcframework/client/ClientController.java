@@ -24,7 +24,7 @@ public class ClientController {
 	public void say(){
 		String msg = demoService.hello();
 		Person person = demoService.findPerson("陈伟");
-		System.out.println(msg+":"+person.getAddress());
+		System.out.println(person);
 		runThreads.countDown();
 
 	}

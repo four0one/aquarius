@@ -1,6 +1,7 @@
 package com.rpcframework.core.codec;
 
 import com.rpcframework.core.codec.fst.FstSerialize;
+import com.rpcframework.core.codec.kryo.KryoSerialize;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -21,6 +22,8 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
 	private FstSerialize fstSerialize = new FstSerialize();
 
+	private KryoSerialize kryoSerialize = new KryoSerialize();
+
 	@Override
 	protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) throws Exception {
 		if (byteBuf.readableBytes() < 4) {
@@ -40,7 +43,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
 			try {
 				//反序列化
-				Object obj = fstSerialize.deserialize(messageBody);
+				Object obj = kryoSerialize.deserialize(messageBody);
 				list.add(obj);
 			} catch (IOException e) {
 				logger.error(ExceptionUtils.getStackTrace(e));

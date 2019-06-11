@@ -7,6 +7,7 @@ import com.rpcframework.core.RpcRequest;
 import com.rpcframework.core.RpcResponse;
 import com.rpcframework.core.heartbeat.Ping;
 import com.rpcframework.core.heartbeat.Pong;
+import de.javakaffee.kryoserializers.SynchronizedCollectionsSerializer;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 
 /**
@@ -20,11 +21,10 @@ public class KryoFactoryPool {
 		public Kryo create() {
 			Kryo kryo = new Kryo();
 			kryo.setReferences(false);
-			kryo.register(RpcRequest.class);
-			kryo.register(RpcResponse.class);
-			kryo.register(Ping.class);
-			kryo.register(Pong.class);
-			kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
+			kryo.setRegistrationRequired(false);
+			kryo.setInstantiatorStrategy(new Kryo.DefaultInstantiatorStrategy(
+					new StdInstantiatorStrategy()));
+			SynchronizedCollectionsSerializer.registerSerializers(kryo);
 			return kryo;
 		}
 	};

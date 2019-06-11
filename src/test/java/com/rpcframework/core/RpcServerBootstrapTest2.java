@@ -10,7 +10,8 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 public class RpcServerBootstrapTest2 {
 
 	public static void main(String[] args) {
-		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:spring-config-study01.xml");
+		ApplicationContext context =
+				new ClassPathXmlApplicationContext("classpath:spring-config-study02.xml");
 	}
 
 }

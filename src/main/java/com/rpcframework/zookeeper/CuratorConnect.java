@@ -163,6 +163,7 @@ public class CuratorConnect {
 	}
 
 	public void listenChildrenChange(String path,PathChildrenCacheListener listener) {
+		client.usingNamespace(workspace);
 		// 为子节点添加watcher
 		// PathChildrenCache: 监听数据节点的增删改，可以设置触发的事件
 		PathChildrenCache childrenCache = new PathChildrenCache(client, path, true);

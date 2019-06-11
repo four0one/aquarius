@@ -97,9 +97,9 @@ public class ClientRpcServiceProxyProcessor implements BeanPostProcessor, Initia
 
 	@Override
 	public void childEvent(CuratorFramework curatorFramework, PathChildrenCacheEvent event) throws Exception {
-		String path = event.getData().getPath();
 		if (event.getType().equals(PathChildrenCacheEvent.Type.CHILD_ADDED)) {  // 添加子节点时触发
-			String serviceName = path.substring(0, path.lastIndexOf("/"));
+			String path = event.getData().getPath();
+			String serviceName = path.substring(1, path.lastIndexOf("/"));
 			ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceDiscoverer.generateServiceRing(serviceName));
 			String address = new String(event.getData().getData());
 			String[] hostAndPort = address.split(":");
@@ -109,7 +109,8 @@ public class ClientRpcServiceProxyProcessor implements BeanPostProcessor, Initia
 		}
 
 		if(event.getType().equals(PathChildrenCacheEvent.Type.CHILD_REMOVED)){
-			String serviceName = path.substring(0, path.lastIndexOf("/"));
+			String path = event.getData().getPath();
+			String serviceName = path.substring(1, path.lastIndexOf("/"));
 			ServiceRegistMapContext.addRpcServiceHashRing(serviceName, serviceDiscoverer.generateServiceRing(serviceName));
 			String address = new String(event.getData().getData());
 			String[] hostAndPort = address.split(":");

@@ -19,7 +19,7 @@ public class PooledChannelHolder {
 	protected int poolMaximumActiveConnections = 32;
 
 	//最大空闲连接数
-	protected int poolMaximumIdleConnections = 5;
+	protected int poolMaximumIdleConnections = 1;
 
 
 	private final PooledState state = new PooledState();
@@ -60,7 +60,7 @@ public class PooledChannelHolder {
 //            state.unlock();
 //        }
 //		long counts = state.getReqCounts().incrementAndGet();
-		pooledChannel = state.getIdelChannel(RandomUtils.nextInt(0,poolMaximumIdleConnections));
+		pooledChannel = state.getIdelChannel(0);
 
 		return pooledChannel;
 	}
